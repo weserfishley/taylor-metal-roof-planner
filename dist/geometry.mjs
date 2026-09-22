@@ -18,6 +18,13 @@ export function validPolygon(p){
 }
 export function clipX(poly,limit,greater){let out=[];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];const ai=greater?a.x>=limit:a.x<=limit,bi=greater?b.x>=limit:b.x<=limit;if(ai)out.push(a);if(ai!==bi){const t=(limit-a.x)/(b.x-a.x);out.push({x:limit,y:a.y+t*(b.y-a.y)})}}return out;}
 export function planeData(face,origin){const points=face.points.map(p=>project(p,origin)),uv=points.map(p=>toUV(p,face.bearing));const top=Math.max(...uv.map(p=>p.y));return {points,uv,flat:area(points),surface:area(points)*slopeFactor(face.pitch),height:p=>(face.eave||0)*FT+(top-toUV(p,face.bearing).y)*face.pitch/12};}
+export function edgeSurfaceLength(face,index,origin){const data=planeData(face,origin),a=data.points[index],b=data.points[(index+1)%data.points.length];return Math.hypot(distance(a,b),data.height(a)-data.height(b))/FT;}
+export function resizeEdgeEndpoint(face,index,targetFeet,origin){
+ const data=planeData(face,origin),a=data.points[index],b=data.points[(index+1)%data.points.length],plan=distance(a,b);
+ if(!(targetFeet>0)||!Number.isFinite(targetFeet)||plan<.03)throw Error('Invalid roof-line length');
+ const surface=Math.hypot(plan,data.height(a)-data.height(b)),targetPlan=targetFeet*FT/(surface/plan),scale=targetPlan/plan;
+ return unproject({x:a.x+(b.x-a.x)*scale,y:a.y+(b.y-a.y)*scale},origin);
+}
 export function panelLayout(face,origin,settings){
  const data=planeData(face,origin),poly=data.uv,w=settings.width/12*FT,max=settings.maxLength*FT,allow=settings.allowance/12*FT,factor=slopeFactor(face.pitch);
  const lo=Math.min(...poly.map(p=>p.x)),hi=Math.max(...poly.map(p=>p.x)),count=Math.ceil((hi-lo-1e-8)/w);if(!Number.isFinite(count)||count>3000)return [];
