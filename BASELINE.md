@@ -4,6 +4,8 @@ Checkpoint date: September 22, 2026
 
 This is the agreed starting point for future development, not a claim of production certification. The user requested a saving point and baseline standards. No app behavior or live deployment is changed by this checkpoint.
 
+Subsequent development is governed by `ROOF_PLANNER_ENGINEERING_STANDARD.md` (RPES). The historical Baseline 1.0 tag remains unchanged.
+
 - Live app: https://taylor-metal-roof-planner.taylor-metal-1153.chatgpt.site/
 - Preserved application source: `62a9a3b6412c18aa73e6f97fc2129e7995288ee4`
 - Local checkpoint tag: `baseline-v1.0-2026-09-22`
