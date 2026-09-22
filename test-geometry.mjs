@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {FT,area,project,unproject,validPolygon,planeData,panelLayout,summarize} from './dist/geometry.mjs';
+import {FT,area,distance,project,unproject,validPolygon,planeData,panelLayout,summarize,edgeSurfaceLength,resizeEdgeEndpoint} from './dist/geometry.mjs';
 const origin={lat:45,lng:-123};
 const points=[{x:0,y:0},{x:40*FT,y:0},{x:40*FT,y:20*FT},{x:0,y:20*FT}];
 const face={id:'A',name:'40 × 20',points:points.map(p=>unproject(p,origin)),pitch:6,bearing:0,eave:10};
@@ -15,6 +15,8 @@ assert.equal(validPolygon(points),true);
 const moved={...face,points:[{x:0,y:0},{x:50*FT,y:0},{x:50*FT,y:20*FT},{x:0,y:20*FT}].map(p=>unproject(p,origin))};close(planeData(moved,origin).flat/FT**2,1000);
 const reversed={...face,bearing:180};assert.equal(panelLayout(reversed,origin,settings).length,30);
 const rotated={...face,bearing:90};assert.equal(panelLayout(rotated,origin,settings).length,15);
+const resized=structuredClone(face);resized.points[1]=resizeEdgeEndpoint(resized,0,50,origin);close(edgeSurfaceLength(resized,0,origin),50);close(distance(project(resized.points[0],origin),project(resized.points[1],origin))/FT,50);
+const resizedSlope=structuredClone(face);resizedSlope.points[2]=resizeEdgeEndpoint(resizedSlope,1,30,origin);close(edgeSurfaceLength(resizedSlope,1,origin),30);
 close(planeData(face,origin).height(points[0]),10*FT+20*FT*.5);
 close(planeData({...face,pitch:12},origin).height(points[0]),30*FT);
-console.log('PASS: geographic scale, polygon area, per-plane pitch, edit recalculation, panel widths, lengths, direction, maximum-length flags, 3D heights, crossed-polygon rejection');
+console.log('PASS: geographic scale, polygon area, per-plane pitch, typed roof-line resizing (flat and sloped), edit recalculation, panel widths, lengths, direction, maximum-length flags, 3D heights, crossed-polygon rejection');

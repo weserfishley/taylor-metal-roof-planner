@@ -4,15 +4,15 @@ An interactive web application for tracing roof planes over aerial imagery, labe
 
 ## Use the app
 
-The GitHub Pages address will be added after the first deployment.
+Live app: https://weserfishley.github.io/taylor-metal-roof-planner/
 
-1. Find an address and confirm the building on the aerial map.
-2. Draw one roof plane at a time and refine its corners.
-3. Label ridge, hip, valley, rake, eave, and flashing edges.
+1. Start typing an address, choose an autocomplete result, and confirm the building on the aerial map.
+2. Use Auto-outline and click a building to start from a free OpenStreetMap footprint, or draw one roof plane at a time manually. Refine either result by dragging its corners.
+3. Label ridge, hip, valley, rake, eave, and flashing edges. Select a roof line to enter its field-measured feet and inches; the endpoint moves while remaining draggable.
 4. Set the pitch and downslope direction for each plane.
 5. Choose effective panel coverage and review estimated lengths and quantities.
 
-The application uses Esri aerial imagery and a public address-search service. It does not require a Google Maps API key.
+The application uses Esri aerial imagery and address autocomplete plus OpenStreetMap building footprints through the public Overpass API. It does not require a Google Maps API key. Footprint coverage and geometry vary, so automatic outlines are editable starting points rather than roof-image detection or field-verified measurements.
 
 ## Important limitation
 
