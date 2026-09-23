@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {FT,unproject,summarize} from './dist/geometry.mjs';
+import {createProjectState,snapshotProject,parseProject,PROJECT_VERSION} from './dist/project.mjs';
+import {quoteTotals,buildReportHtml} from './dist/report.mjs';
+
+const origin={lat:45,lng:-123},state=createProjectState();
+state.address='100 Test Roof Lane';state.origin=origin;
+state.outlines=[{id:'outline-a',name:'Overall roof',points:[{x:0,y:0},{x:40*FT,y:0},{x:40*FT,y:20*FT},{x:0,y:20*FT}].map(point=>unproject(point,origin))}];
+state.faces=[{id:'face-a',name:'Front plane',type:'Main roof',pitch:6,bearing:0,eave:12,points:[{x:0,y:0},{x:20*FT,y:0},{x:20*FT,y:20*FT},{x:0,y:20*FT}].map(point=>unproject(point,origin)),edges:['Eave','Rake','Ridge','Rake']},{id:'face-b',name:'Rear plane',type:'Main roof',pitch:6,bearing:180,eave:12,points:[{x:20*FT,y:0},{x:40*FT,y:0},{x:40*FT,y:20*FT},{x:20*FT,y:20*FT}].map(point=>unproject(point,origin)),edges:['Eave','Rake','Ridge','Rake']}];
+state.settings={width:16,maxLength:32,allowance:1,color:'#3d454b',autoSnap:true};
+state.materials={panelType:'Taylor standing seam',gauge:'24 ga',colorName:'Charcoal'};
+state.customer={name:'Morgan Customer',company:'Customer Co.',phone:'555-0100',email:'morgan@example.com'};
+state.quote={projectName:'Customer roof',number:'Q-100',date:'2026-09-23',validUntil:'2026-10-23',taxRate:7.5,materialPricePerSqFt:4.25,trimPrices:{Ridge:9,Hip:8,Valley:10,Rake:7,Eave:6},accessories:[{description:'Delivery',quantity:1,unitPrice:250}],notes:'Field verify.'};
+const saved=snapshotProject(state,{step:5,view:'three',showPanels:true,selectedFaceId:'face-b',selectedOutlineId:null,selectedEdge:'edge-key',map:{center:origin,zoom:21},camera:{target:{x:1,y:2,z:3},radius:55,theta:1.2,phi:.7}}),restored=parseProject(JSON.stringify(saved));
+assert.equal(restored.version,PROJECT_VERSION);assert.equal(restored.faces[1].id,'face-b');assert.deepEqual(restored.faces[0].edges,state.faces[0].edges);assert.equal(restored.ui.view,'three');assert.equal(restored.ui.showPanels,true);assert.equal(restored.ui.selectedFaceId,'face-b');assert.equal(restored.ui.camera.radius,55);assert.equal(restored.customer.name,'Morgan Customer');assert.equal(restored.quote.accessories[0].description,'Delivery');assert.equal(restored.materials.gauge,'24 ga');
+const before=summarize(state.faces,state.origin,state.settings),after=summarize(restored.faces,restored.origin,restored.settings);assert.equal(after.count,before.count);assert.ok(Math.abs(after.surface-before.surface)<1e-8);assert.ok(Math.abs(after.orderArea-before.orderArea)<1e-8);
+const edgeTotals={Ridge:40,Hip:0,Valley:0,Rake:40,Eave:40},pricing=quoteTotals(restored,after,edgeTotals);assert.ok(pricing.total>pricing.subtotal);const html=buildReportHtml({state:restored,summary:after,edgeTotals,cutGroups:[{name:'Front plane',length:22.5,qty:15,oversize:false}],images:[{label:'Front perspective',data:'data:image/jpeg;base64,AA=='}],reportType:'full'});assert.match(html,/Morgan Customer/);assert.match(html,/Front perspective/);assert.match(html,/Roof-edge totals/);assert.match(html,/Taylor standing seam/);
+const legacy=structuredClone(saved);legacy.version=3;delete legacy.customer;delete legacy.quote;delete legacy.materials;delete legacy.ui;legacy.view={center:origin,zoom:20};const migrated=parseProject(legacy);assert.equal(migrated.version,4);assert.equal(migrated.faces[0].id,'face-a');assert.equal(migrated.ui.map.zoom,20);assert.equal(migrated.materials.panelType,'Standing seam');
+assert.throws(()=>parseProject({...saved,faces:[{...saved.faces[0],pitch:99}]}),/pitch/);
+console.log('PASS: version 4 complete project round trip, stable geometry and IDs, legacy migration, quote pricing, and report generation');
