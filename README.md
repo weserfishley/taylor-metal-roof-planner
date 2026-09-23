@@ -15,6 +15,10 @@ Live app: https://weserfishley.github.io/taylor-metal-roof-planner/
 
 Connected roof planes share their snapped vertices. Drag a corner, the diamond edge handle, or the center move handle to refine the roof while keeping adjoining geometry connected. With **Keep connected planes snapped** enabled, pitch or height edits automatically reconcile safe shared-edge intersections. The solver preserves the entered pitch, limits automatic horizontal movement to six feet per pass, and leaves oversized or invalid changes highlighted for manual review.
 
+Project-file version 4 restores the complete editable session: outlines, planes, stable object IDs, roof-line labels, pitch, panel/material settings, customer and quote information, map position, workflow step, selected geometry, panel visibility, and 3D camera. Version 2 and version 3 files remain readable and are upgraded when saved again.
+
+The live takeoff displays combined ridge, hip, valley, rake, and eave lengths. The customer-report workflow uses those same live calculations for pricing and produces print-ready quote, material, panel-layout, and full-project report options. Reports may include five 3D perspectives with the calculated panel layout; use the browser print window to save the result as PDF.
+
 The application uses Esri aerial imagery and address autocomplete plus OpenStreetMap building footprints through the public Overpass API. It does not require a Google Maps API key. Footprint coverage and geometry vary. Automatic outlines are editable snap guides only: they are excluded from roof area, panels, cut lists, exports, and 3D calculations.
 
 ## Important limitation

@@ -1,5 +1,17 @@
 # Release record
 
+## Complete project files and estimating reports — September 23, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Complete Save/Open restoration; stable geometry IDs; customer, quote, material, and pricing state; always-visible ridge/hip/valley/rake/eave totals; configurable print/PDF reports; five 3D report views with optional calculated panel layout |
+| Risk class | R3 — project schema, calculation reporting, imports/exports, and 3D capture. Pricing is an estimator input, not an ordering or payment system. |
+| Data model | Project-file version 4. Versions 2 and 3 migrate with safe defaults. Derived areas, edge totals, panels, cuts, pricing, and report content are recalculated from the restored geometry and current settings rather than trusted as stale saved totals. |
+| Pricing rule | Panel material uses ordered blank area × entered price per square foot. Each trim category uses its live deduplicated linear footage × its entered rate. Accessories use entered quantity × unit price. Tax applies to the calculated subtotal. |
+| Verification | PASS locally: module syntax; existing geometry suite; version-4 nontrivial multi-plane JSON round trip; stable IDs, selections, map/3D state, labels, pitches, materials and quote data; legacy migration and invalid-input rejection; report/pricing fixtures; browser project open; restored workflow step, panel visibility, totals, selected plane and 3D view; five-view report capture without console warnings/errors; 600 × 900 responsive control check. Browser download initiation passed. Hosted deployment is NOT VERIFIED and is not part of this local change yet. |
+| Open limits | Reports use the browser print dialog for Save as PDF. Pricing is user-entered and has no catalog, inventory, payment, tax-jurisdiction, or manufacturer-rule integration. Panel overrides are reserved in the schema but arbitrary per-panel editing is not implemented. Browser-generated PDFs can vary slightly by print engine. |
+| Rollback | Tag `connected-geometry-v1.3-2026-09-23` |
+
 ## Connected plane editing and safe junction solver — September 23, 2026
 
 | Field | Record |
