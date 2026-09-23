@@ -1,0 +1,16 @@
+{
+  "version": 4,
+  "address": "100 Test Roof Lane",
+  "origin": {"lat": 45, "lng": -123},
+  "outlines": [{"id": "outline-a", "name": "Overall roof", "points": [{"lat":45,"lng":-123},{"lat":45,"lng":-122.99984511165449},{"lat":45.00005476129972,"lng":-122.99984511165449},{"lat":45.00005476129972,"lng":-123}]}],
+  "faces": [
+    {"id":"face-a","name":"Front plane","type":"Main roof","pitch":6,"bearing":0,"eave":12,"points":[{"lat":45,"lng":-123},{"lat":45,"lng":-122.99992255582724},{"lat":45.00005476129972,"lng":-122.99992255582724},{"lat":45.00005476129972,"lng":-123}],"edges":["Eave","Rake","Ridge","Rake"]},
+    {"id":"face-b","name":"Rear plane","type":"Main roof","pitch":6,"bearing":180,"eave":12,"points":[{"lat":45,"lng":-122.99992255582724},{"lat":45,"lng":-122.99984511165449},{"lat":45.00005476129972,"lng":-122.99984511165449},{"lat":45.00005476129972,"lng":-122.99992255582724}],"edges":["Eave","Rake","Ridge","Rake"]}
+  ],
+  "settings": {"width":16,"maxLength":32,"allowance":1,"color":"#3d454b","autoSnap":true},
+  "materials": {"panelType":"Taylor standing seam","gauge":"24 ga","colorName":"Charcoal"},
+  "customer": {"name":"Morgan Customer","company":"Customer Co.","phone":"555-0100","email":"morgan@example.com"},
+  "quote": {"projectName":"Customer roof","number":"Q-100","date":"2026-09-23","validUntil":"2026-10-23","taxRate":7.5,"materialPricePerSqFt":4.25,"trimPrices":{"Ridge":9,"Hip":8,"Valley":10,"Rake":7,"Eave":6},"accessories":[{"description":"Delivery","quantity":1,"unitPrice":250}],"notes":"Field verify before ordering."},
+  "panelOverrides": [],
+  "ui": {"step":5,"view":"three","showPanels":true,"selectedFaceId":"face-b","selectedOutlineId":null,"selectedEdge":null,"map":{"center":{"lat":45.00002738064986,"lng":-122.99992255582724},"zoom":21},"camera":{"target":{"x":6.096,"y":4.5,"z":-3.048},"radius":38,"theta":1.2,"phi":0.7}}
+}
