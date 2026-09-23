@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {FT,area,distance,project,unproject,validPolygon,planeData,panelLayout,summarize,edgeSurfaceLength,resizeEdgeEndpoint} from './dist/geometry.mjs';
+import {FT,area,distance,project,unproject,validPolygon,planeData,planeEquation,junctionReport,panelLayout,summarize,edgeSurfaceLength,resizeEdgeEndpoint} from './dist/geometry.mjs';
 const origin={lat:45,lng:-123};
 const points=[{x:0,y:0},{x:40*FT,y:0},{x:40*FT,y:20*FT},{x:0,y:20*FT}];
 const face={id:'A',name:'40 × 20',points:points.map(p=>unproject(p,origin)),pitch:6,bearing:0,eave:10};
@@ -19,4 +19,9 @@ const resized=structuredClone(face);resized.points[1]=resizeEdgeEndpoint(resized
 const resizedSlope=structuredClone(face);resizedSlope.points[2]=resizeEdgeEndpoint(resizedSlope,1,30,origin);close(edgeSurfaceLength(resizedSlope,1,origin),30);
 close(planeData(face,origin).height(points[0]),10*FT+20*FT*.5);
 close(planeData({...face,pitch:12},origin).height(points[0]),30*FT);
-console.log('PASS: geographic scale, polygon area, per-plane pitch, typed roof-line resizing (flat and sloped), edit recalculation, panel widths, lengths, direction, maximum-length flags, 3D heights, crossed-polygon rejection');
+const east={...face,id:'E',name:'East',points:[points[1],{x:60*FT,y:0},{x:60*FT,y:20*FT},points[2]].map(p=>unproject(p,origin))};
+let joints=junctionReport([face,east],origin);assert.equal(joints.length,1);assert.equal(joints[0].status,'aligned');
+const raised={...east,id:'R',eave:12};joints=junctionReport([face,raised],origin);assert.equal(joints[0].status,'offset');close(joints[0].gapA/FT,-2);close(joints[0].gapB/FT,-2);
+const crossing={...east,id:'C',bearing:90};joints=junctionReport([face,crossing],origin);assert.equal(joints[0].status,'conflict');
+const equation=planeEquation(face,origin);close(equation.height(points[0]),planeData(face,origin).height(points[0]));
+console.log('PASS: geographic scale, polygon area, per-plane pitch, typed roof-line resizing (flat and sloped), edit recalculation, panel widths, lengths, direction, maximum-length flags, 3D heights, aligned/offset/conflicting shared-edge junctions, crossed-polygon rejection');

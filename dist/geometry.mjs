@@ -25,6 +25,14 @@ export function resizeEdgeEndpoint(face,index,targetFeet,origin){
  const surface=Math.hypot(plan,data.height(a)-data.height(b)),targetPlan=targetFeet*FT/(surface/plan),scale=targetPlan/plan;
  return unproject({x:a.x+(b.x-a.x)*scale,y:a.y+(b.y-a.y)*scale},origin);
 }
+export function planeEquation(face,origin){const data=planeData(face,origin),v=axes(face.bearing).v,k=face.pitch/12,top=Math.max(...data.points.map(p=>toUV(p,face.bearing).y));return {gx:-v.x*k,gy:-v.y*k,c:(face.eave||0)*FT+top*k,height(p){return this.gx*p.x+this.gy*p.y+this.c}};}
+const pointKey=p=>`${p.lat.toFixed(7)},${p.lng.toFixed(7)}`,sharedKey=(a,b)=>[pointKey(a),pointKey(b)].sort().join('|');
+export function junctionReport(faces,origin,tolerance=.0254){
+ const edges=new Map(),report=[];
+ for(const face of faces)face.points.forEach((a,index)=>{const b=face.points[(index+1)%face.points.length],key=sharedKey(a,b);if(!edges.has(key))edges.set(key,[]);edges.get(key).push({face,index,a,b})});
+ for(const matches of edges.values())if(matches.length>1)for(let i=0;i<matches.length;i++)for(let j=i+1;j<matches.length;j++){const left=matches[i],right=matches[j],a=project(left.a,origin),b=project(left.b,origin),p=planeEquation(left.face,origin),q=planeEquation(right.face,origin),gapA=p.height(a)-q.height(a),gapB=p.height(b)-q.height(b),maxGap=Math.max(Math.abs(gapA),Math.abs(gapB)),variation=Math.abs(gapA-gapB),status=maxGap<=tolerance?'aligned':variation<=tolerance?'offset':'conflict';report.push({left,right,a,b,gapA,gapB,maxGap,variation,status})}
+ return report;
+}
 export function panelLayout(face,origin,settings){
  const data=planeData(face,origin),poly=data.uv,w=settings.width/12*FT,max=settings.maxLength*FT,allow=settings.allowance/12*FT,factor=slopeFactor(face.pitch);
  const lo=Math.min(...poly.map(p=>p.x)),hi=Math.max(...poly.map(p=>p.x)),count=Math.ceil((hi-lo-1e-8)/w);if(!Number.isFinite(count)||count>3000)return [];
