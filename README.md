@@ -7,16 +7,17 @@ An interactive web application for tracing roof planes over aerial imagery, labe
 Live app: https://weserfishley.github.io/taylor-metal-roof-planner/
 
 1. Start typing an address, choose an autocomplete result, and confirm the building on the aerial map.
-2. Use Auto-outline and click a building to start from a free OpenStreetMap footprint, or draw one roof plane at a time manually. Refine either result by dragging its corners.
-3. Label ridge, hip, valley, rake, eave, and flashing edges. Select a roof line to enter its field-measured feet and inches; the endpoint moves while remaining draggable.
-4. Set the pitch and downslope direction for each plane.
-5. Choose effective panel coverage and review estimated lengths and quantities.
+2. Use Auto-outline and click a building to create an editable overall-boundary snap guide, or proceed without one.
+3. Draw each roof plane manually inside the outline. New corners snap to nearby outline segments, outline corners, and existing plane geometry.
+4. Click a roof line to highlight it immediately, then label it ridge, hip, valley, rake, eave, or flashing. Enter field-measured feet and inches when available.
+5. Set the pitch and downslope direction for every plane. Shared edges are checked against both pitched plane equations before the 3D model is trusted.
+6. Choose effective panel coverage and review estimated lengths and quantities.
 
-The application uses Esri aerial imagery and address autocomplete plus OpenStreetMap building footprints through the public Overpass API. It does not require a Google Maps API key. Footprint coverage and geometry vary, so automatic outlines are editable starting points rather than roof-image detection or field-verified measurements.
+The application uses Esri aerial imagery and address autocomplete plus OpenStreetMap building footprints through the public Overpass API. It does not require a Google Maps API key. Footprint coverage and geometry vary. Automatic outlines are editable snap guides only: they are excluded from roof area, panels, cut lists, exports, and 3D calculations.
 
 ## Important limitation
 
-This application produces aerial estimates, not surveys, structural calculations, code determinations, or fabrication approval. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
+This application produces aerial estimates, not surveys, structural calculations, code determinations, or fabrication approval. Only exact shared 2D edges are currently checked for pitched-plane agreement. Unresolved junctions are reported and displayed as gaps; the application does not silently move geometry to hide them. Automatic intersection solving for arbitrary planes remains a future geometry-engine phase. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
 
 ## Project structure
 
