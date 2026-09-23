@@ -1,5 +1,18 @@
 # Release record
 
+## Connected plane editing and safe junction solver — September 23, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Connected corner propagation; draggable edges and whole planes; optional automatic pitched-junction reconciliation; refined 3D materials, fascia depth, lighting, and shadows |
+| Risk class | R3 — geometry mutation, 3D output, and takeoff recalculation |
+| Constraint rule | Exact shared geographic endpoints define a connection. Manual corner, edge, and plane moves propagate to every face using those endpoints. |
+| Solver rule | Parallel surface offsets reconcile by changing the non-selected plane’s vertical reference. Nonparallel surfaces project the shared endpoints onto the mathematical surface-intersection line. Entered pitch is never changed. |
+| Safety rule | Automatic horizontal movement is capped at 6 feet per solver pass. Invalid polygons are restored. Oversized, ambiguous, or unresolved constraints remain highlighted for manual adjustment. |
+| Verification | PASS locally: syntax, deterministic geometry including anchored height and pitched-intersection solutions, edge dragging, whole-plane dragging with connected-neighbor propagation, aligned junction retention, 3D rendering, and no browser console warnings/errors. Save/open round trip, small-screen interaction, and deployed GitHub Pages are NOT VERIFIED for this release. |
+| Open limits | Constraint ordering is deterministic but not a global least-squares solve. Networks with competing three-or-more-plane constraints may require manual adjustment. Only exact shared edges participate. |
+| Rollback | Tag `geometry-foundation-v1.2-2026-09-23` |
+
 ## Outline/plane separation and pitched-junction validation — September 23, 2026
 
 | Field | Record |

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {FT,area,distance,project,unproject,validPolygon,planeData,planeEquation,junctionReport,panelLayout,summarize,edgeSurfaceLength,resizeEdgeEndpoint} from './dist/geometry.mjs';
+import {FT,area,distance,project,unproject,validPolygon,planeData,planeEquation,junctionReport,solvePlaneJunctions,panelLayout,summarize,edgeSurfaceLength,resizeEdgeEndpoint} from './dist/geometry.mjs';
 const origin={lat:45,lng:-123};
 const points=[{x:0,y:0},{x:40*FT,y:0},{x:40*FT,y:20*FT},{x:0,y:20*FT}];
 const face={id:'A',name:'40 × 20',points:points.map(p=>unproject(p,origin)),pitch:6,bearing:0,eave:10};
@@ -23,5 +23,10 @@ const east={...face,id:'E',name:'East',points:[points[1],{x:60*FT,y:0},{x:60*FT,
 let joints=junctionReport([face,east],origin);assert.equal(joints.length,1);assert.equal(joints[0].status,'aligned');
 const raised={...east,id:'R',eave:12};joints=junctionReport([face,raised],origin);assert.equal(joints[0].status,'offset');close(joints[0].gapA/FT,-2);close(joints[0].gapB/FT,-2);
 const crossing={...east,id:'C',bearing:90};joints=junctionReport([face,crossing],origin);assert.equal(joints[0].status,'conflict');
+const offsetPair=structuredClone([face,raised]);let solved=solvePlaneJunctions(offsetPair,origin);assert.equal(solved.report[0].status,'aligned');close(offsetPair[1].pitch,raised.pitch);
+const anchoredPair=structuredClone([face,raised]);solved=solvePlaneJunctions(anchoredPair,origin,{fixedFaceId:'R'});assert.equal(solved.report[0].status,'aligned');close(anchoredPair[1].eave,raised.eave);close(anchoredPair[0].eave,12);
+const conflictPair=structuredClone([face,crossing]);solved=solvePlaneJunctions(conflictPair,origin,{maxMove:100*FT});assert.equal(solved.report[0].status,'aligned');close(conflictPair[1].pitch,crossing.pitch);assert.equal(edgeKeyForTest(conflictPair[0].points[1],conflictPair[0].points[2]),edgeKeyForTest(conflictPair[1].points[0],conflictPair[1].points[3]));
 const equation=planeEquation(face,origin);close(equation.height(points[0]),planeData(face,origin).height(points[0]));
-console.log('PASS: geographic scale, polygon area, per-plane pitch, typed roof-line resizing (flat and sloped), edit recalculation, panel widths, lengths, direction, maximum-length flags, 3D heights, aligned/offset/conflicting shared-edge junctions, crossed-polygon rejection');
+console.log('PASS: geographic scale, polygon area, per-plane pitch, typed roof-line resizing (flat and sloped), edit recalculation, panel widths, lengths, direction, maximum-length flags, 3D heights, aligned/offset/conflicting shared-edge junctions, automatic pitched-junction solving, crossed-polygon rejection');
+
+function edgeKeyForTest(a,b){return [a,b].map(p=>`${p.lat.toFixed(7)},${p.lng.toFixed(7)}`).sort().join('|')}
