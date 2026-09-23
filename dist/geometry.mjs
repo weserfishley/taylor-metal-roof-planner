@@ -33,6 +33,24 @@ export function junctionReport(faces,origin,tolerance=.0254){
  for(const matches of edges.values())if(matches.length>1)for(let i=0;i<matches.length;i++)for(let j=i+1;j<matches.length;j++){const left=matches[i],right=matches[j],a=project(left.a,origin),b=project(left.b,origin),p=planeEquation(left.face,origin),q=planeEquation(right.face,origin),gapA=p.height(a)-q.height(a),gapB=p.height(b)-q.height(b),maxGap=Math.max(Math.abs(gapA),Math.abs(gapB)),variation=Math.abs(gapA-gapB),status=maxGap<=tolerance?'aligned':variation<=tolerance?'offset':'conflict';report.push({left,right,a,b,gapA,gapB,maxGap,variation,status})}
  return report;
 }
+export function solvePlaneJunctions(faces,origin,{tolerance=.0254,maxMove=6*FT,iterations=8,fixedFaceId=null}={}){
+ const backup=structuredClone(faces),replacePoint=(oldKey,next)=>{for(const face of faces)for(let i=0;i<face.points.length;i++)if(pointKey(face.points[i])===oldKey)face.points[i]=unproject(next,origin)};
+ let changed=false,rejected=0;
+ for(let pass=0;pass<iterations;pass++){
+  const problems=junctionReport(faces,origin,tolerance).filter(j=>j.status!=='aligned');if(!problems.length)break;
+  let passChanged=false;
+  for(const joint of problems){
+   const p=planeEquation(joint.left.face,origin),q=planeEquation(joint.right.face,origin),nx=p.gx-q.gx,ny=p.gy-q.gy,den=nx*nx+ny*ny;
+   if(den<1e-10){const shift=(joint.gapA+joint.gapB)/2/FT;if(Math.abs(shift)>maxMove/FT){rejected++;continue}if(joint.right.face.id===fixedFaceId)joint.left.face.eave=(joint.left.face.eave||0)-shift;else joint.right.face.eave=(joint.right.face.eave||0)+shift;passChanged=changed=true;continue}
+   const c=p.c-q.c,moves=[joint.a,joint.b].map(point=>{const d=(nx*point.x+ny*point.y+c)/den;return {from:point,to:{x:point.x-nx*d,y:point.y-ny*d},distance:Math.abs(d)*Math.sqrt(den)}});
+   if(moves.some(move=>move.distance>maxMove)){rejected++;continue}
+   for(const move of moves)replacePoint(pointKey(unproject(move.from,origin)),move.to);passChanged=changed=true;
+  }
+  if(!passChanged)break;
+ }
+ if(faces.some(face=>!validPolygon(face.points.map(point=>project(point,origin))))){faces.splice(0,faces.length,...backup);return {changed:false,rejected:rejected+1,restored:true,report:junctionReport(faces,origin,tolerance)}}
+ return {changed,rejected,restored:false,report:junctionReport(faces,origin,tolerance)};
+}
 export function panelLayout(face,origin,settings){
  const data=planeData(face,origin),poly=data.uv,w=settings.width/12*FT,max=settings.maxLength*FT,allow=settings.allowance/12*FT,factor=slopeFactor(face.pitch);
  const lo=Math.min(...poly.map(p=>p.x)),hi=Math.max(...poly.map(p=>p.x)),count=Math.ceil((hi-lo-1e-8)/w);if(!Number.isFinite(count)||count>3000)return [];

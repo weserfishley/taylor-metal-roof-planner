@@ -13,11 +13,13 @@ Live app: https://weserfishley.github.io/taylor-metal-roof-planner/
 5. Set the pitch and downslope direction for every plane. Shared edges are checked against both pitched plane equations before the 3D model is trusted.
 6. Choose effective panel coverage and review estimated lengths and quantities.
 
+Connected roof planes share their snapped vertices. Drag a corner, the diamond edge handle, or the center move handle to refine the roof while keeping adjoining geometry connected. With **Keep connected planes snapped** enabled, pitch or height edits automatically reconcile safe shared-edge intersections. The solver preserves the entered pitch, limits automatic horizontal movement to six feet per pass, and leaves oversized or invalid changes highlighted for manual review.
+
 The application uses Esri aerial imagery and address autocomplete plus OpenStreetMap building footprints through the public Overpass API. It does not require a Google Maps API key. Footprint coverage and geometry vary. Automatic outlines are editable snap guides only: they are excluded from roof area, panels, cut lists, exports, and 3D calculations.
 
 ## Important limitation
 
-This application produces aerial estimates, not surveys, structural calculations, code determinations, or fabrication approval. Only exact shared 2D edges are currently checked for pitched-plane agreement. Unresolved junctions are reported and displayed as gaps; the application does not silently move geometry to hide them. Automatic intersection solving for arbitrary planes remains a future geometry-engine phase. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
+This application produces aerial estimates, not surveys, structural calculations, code determinations, or fabrication approval. Automatic reconciliation operates only on exact shared 2D edges and preserves each plane’s entered pitch. Multi-plane constraint networks, arbitrary non-shared surface intersections, topology repair, and structural validation remain future geometry-engine work. Unresolved or unsafe junctions remain visibly flagged. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
 
 ## Project structure
 
