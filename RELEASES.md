@@ -1,5 +1,19 @@
 # Release record
 
+## Tolerance-bounded topology and multi-plane junction solver — September 23, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Configurable 0.5–24 inch junction-snap tolerance; nearby cross-plane vertex clustering; insertion of a shared vertex where a plane corner terminates near another plane edge; pitch-equation reconciliation of shared edges; least-squares XYZ solution for corners shared by three or more planes; named conflict diagnostics; 3D conflict markers |
+| Risk class | R3 — topology mutation, pitched geometry, 3D output, and every dependent measurement/takeoff calculation |
+| Topology rule | Only vertices on different planes participate. Nearby vertices share one geographic coordinate. A vertex near the interior of another plane edge is inserted into that edge so the connection is topological rather than merely visual. Ambiguous clusters containing multiple corners from the same face are not auto-collapsed. |
+| Geometry rule | Nonparallel two-plane edges use the exact intersection of their entered plane equations. Parallel planes with inconsistent entered elevations remain unresolved. Three-or-more-plane corners use a full-rank least-squares XY solution and are accepted only when all resulting heights agree within 1 inch. Pitch and eave elevation are never changed. |
+| Safety rule | Proximity repair is limited by the user-selected tolerance. Plane-intersection movement remains capped at 6 feet per pass. Rank-deficient, residual-conflicting, oversized, or polygon-invalid solutions remain unresolved; invalid polygon changes restore the pre-solve geometry. |
+| Recalculation rule | Manual corner, edge, and plane drags invoke the same solver, then rebuild the summary, panels, measurements, edge totals, and 3D model through the existing render path. |
+| Verification | PASS locally: module syntax; prior geometry and project suites; near-edge gap closure; vertex-on-edge insertion; exact shared-key creation; pitch preservation; solvable three-plane junction; unsolvable parallel three-plane conflict retention; project save/open preservation of snap tolerance. Browser: two adjoining planes reported one aligned junction and rendered one continuous 3D seam; no console warnings/errors. Small-screen interaction and hosted GitHub Pages are NOT VERIFIED for this local change. |
+| Open limits | This is a bounded local constraint solver, not a global nonlinear roof-network optimizer. Collinear/rank-deficient three-plane systems and mutually inconsistent entered constraints remain warnings. Automatic topology repair does not infer which separated edges were intended to meet beyond the configured proximity tolerance. |
+| Rollback | Tag `estimating-reports-v1.4-2026-09-23` |
+
 ## Complete project files and estimating reports — September 23, 2026
 
 | Field | Record |
