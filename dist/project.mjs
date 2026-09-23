@@ -9,7 +9,7 @@ const finite=(value,min,max,name)=>{const number=Number(value);if(!Number.isFini
 const id=(value,prefix,index,used)=>{let next=cleanText(value,100);if(!next||used.has(next))next=`${prefix}-${index+1}-${Math.random().toString(36).slice(2,10)}`;used.add(next);return next};
 
 export function createProjectState(){
- return {version:PROJECT_VERSION,address:'',origin:{lat:44.9385,lng:-123.0303},outlines:[],faces:[],settings:{width:16,maxLength:32,allowance:0,color:'#477785',autoSnap:true},materials:{panelType:'Standing seam',gauge:'26 ga',colorName:'Slate blue'},customer:{name:'',company:'',phone:'',email:''},quote:{projectName:'',number:'',date:new Date().toISOString().slice(0,10),validUntil:'',taxRate:0,materialPricePerSqFt:0,trimPrices:{Ridge:0,Hip:0,Valley:0,Rake:0,Eave:0},accessories:[],notes:''},panelOverrides:[],ui:{step:1,view:'map',showPanels:false,selectedFaceId:null,selectedOutlineId:null,selectedEdge:null,map:null,camera:null}};
+ return {version:PROJECT_VERSION,address:'',origin:{lat:44.9385,lng:-123.0303},outlines:[],faces:[],settings:{width:16,maxLength:32,allowance:0,color:'#477785',autoSnap:true,snapTolerance:6},materials:{panelType:'Standing seam',gauge:'26 ga',colorName:'Slate blue'},customer:{name:'',company:'',phone:'',email:''},quote:{projectName:'',number:'',date:new Date().toISOString().slice(0,10),validUntil:'',taxRate:0,materialPricePerSqFt:0,trimPrices:{Ridge:0,Hip:0,Valley:0,Rake:0,Eave:0},accessories:[],notes:''},panelOverrides:[],ui:{step:1,view:'map',showPanels:false,selectedFaceId:null,selectedOutlineId:null,selectedEdge:null,map:null,camera:null}};
 }
 
 export function snapshotProject(state,ui={}){
@@ -39,7 +39,7 @@ export function parseProject(input){
  if(rawOutlines.length>20)throw Error('Project has too many outlines');
  const outlines=rawOutlines.map((outline,index)=>({id:id(outline.id,'outline',index,used),name:cleanText(outline.name||`Roof outline ${index+1}`,60)||`Roof outline ${index+1}`,points:validatePoints(outline.points,`Roof outline ${index+1}`)}));
  const defaults=createProjectState(),settings=raw.settings||{};
- const cleanSettings={width:finite(settings.width,1,120,'panel coverage width'),maxLength:finite(settings.maxLength,1,200,'maximum panel length'),allowance:finite(settings.allowance,0,48,'panel allowance'),color:/^#[a-f\d]{6}$/i.test(settings.color||'')?settings.color:defaults.settings.color,autoSnap:settings.autoSnap!==false};
+ const cleanSettings={width:finite(settings.width,1,120,'panel coverage width'),maxLength:finite(settings.maxLength,1,200,'maximum panel length'),allowance:finite(settings.allowance,0,48,'panel allowance'),color:/^#[a-f\d]{6}$/i.test(settings.color||'')?settings.color:defaults.settings.color,autoSnap:settings.autoSnap!==false,snapTolerance:finite(settings.snapTolerance??6,.5,24,'junction snap tolerance')};
  const materials={panelType:cleanText(raw.materials?.panelType||'Standing seam',80)||'Standing seam',gauge:cleanText(raw.materials?.gauge||'26 ga',30)||'26 ga',colorName:cleanText(raw.materials?.colorName||'Custom color',60)||'Custom color'};
  const customer={name:cleanText(raw.customer?.name,100),company:cleanText(raw.customer?.company,100),phone:cleanText(raw.customer?.phone,50),email:cleanText(raw.customer?.email,120)};
  const sourceQuote=raw.quote||{},trimPrices={};for(const type of REPORT_EDGE_TYPES)trimPrices[type]=finite(sourceQuote.trimPrices?.[type]??0,0,10000,`${type.toLowerCase()} price`);

@@ -31,9 +31,13 @@ jobs:
 
       - name: Verify application
         run: |
+          node --check dist/geometry.mjs
           node --check dist/app.mjs
+          node --check dist/project.mjs
+          node --check dist/report.mjs
           node --check dist/roof3d.mjs
           node test-geometry.mjs
+          node test-project.mjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

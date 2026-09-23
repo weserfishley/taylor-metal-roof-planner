@@ -13,7 +13,7 @@ Live app: https://weserfishley.github.io/taylor-metal-roof-planner/
 5. Set the pitch and downslope direction for every plane. Shared edges are checked against both pitched plane equations before the 3D model is trusted.
 6. Choose effective panel coverage and review estimated lengths and quantities.
 
-Connected roof planes share their snapped vertices. Drag a corner, the diamond edge handle, or the center move handle to refine the roof while keeping adjoining geometry connected. With **Keep connected planes snapped** enabled, pitch or height edits automatically reconcile safe shared-edge intersections. The solver preserves the entered pitch, limits automatic horizontal movement to six feet per pass, and leaves oversized or invalid changes highlighted for manual review.
+Connected roof planes share their snapped vertices. Drag a corner, the diamond edge handle, or the center move handle to refine the roof while keeping adjoining geometry connected. With **Keep connected planes snapped** enabled, nearby vertices and vertices close to an adjoining edge become shared topology within the configurable 0.5–24 inch tolerance. Geometry edits then reconcile safe nonparallel shared-edge intersections, and corners shared by three or more planes are solved as one XYZ junction. The solver preserves entered pitch and eave elevation, limits automatic horizontal movement to six feet per pass, and leaves offset, oversized, rank-deficient, or invalid constraints highlighted by plane and edge name for manual review.
 
 Project-file version 4 restores the complete editable session: outlines, planes, stable object IDs, roof-line labels, pitch, panel/material settings, customer and quote information, map position, workflow step, selected geometry, panel visibility, and 3D camera. Version 2 and version 3 files remain readable and are upgraded when saved again.
 
@@ -23,7 +23,7 @@ The application uses Esri aerial imagery and address autocomplete plus OpenStree
 
 ## Important limitation
 
-This application produces aerial estimates, not surveys, structural calculations, code determinations, or fabrication approval. Automatic reconciliation operates only on exact shared 2D edges and preserves each plane’s entered pitch. Multi-plane constraint networks, arbitrary non-shared surface intersections, topology repair, and structural validation remain future geometry-engine work. Unresolved or unsafe junctions remain visibly flagged. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
+This application produces aerial estimates, not surveys, structural calculations, code determinations, or fabrication approval. Automatic reconciliation first repairs only small, tolerance-bounded 2D gaps, then evaluates the mathematical pitched-plane intersections while preserving each plane’s entered pitch. It does not globally optimize arbitrary overlapping surfaces or silently alter protected measurements. Over-constrained, rank-deficient, oversized, or invalid junctions remain visibly flagged. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
 
 ## Project structure
 
