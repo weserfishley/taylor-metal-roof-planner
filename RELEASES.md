@@ -1,5 +1,18 @@
 # Release record
 
+## Predictive roof snapping and immediate edge editing — September 28, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Immediate roof-edge selection and labeling; live edge-total refresh; ranked snapping to shared roof points, roof edges/intersections, outline geometry, and optional 1-foot recommended grid points; visible snap destination; larger transparent touch hit areas; two-plane shared-corner junction reconciliation. |
+| Risk class | R3 — topology mutation, pitched geometry, 3D output, and dependent estimates. |
+| Interaction rule | A selected edge remains selected while its label is written on `input` and `change`; the map, tooltip, and combined edge totals refresh in the same render cycle. Auto Snap may be disabled or bypassed with Alt for intentional free placement. |
+| Geometry rule | Shared geometry wins over visual-grid suggestions. The solver projects a valid two-plane shared corner onto the exact intersection line, while retaining pitch and eave elevation. Invalid or over-bounded constraints stay visibly unresolved. |
+| Mobile rule | Visible handles remain compact while their transparent interactive areas are 44 × 44 pixels. Nearby targets use a larger coarse-pointer search radius and show the intended landing point while drawing or dragging. |
+| Verification | PASS locally: JavaScript syntax; full geometry regression including two- and three-plane solving, pitch/eave preservation, conflict retention, and cross-polygon rejection; version-4 project round trip including `gridSnap`; immediate first-selection edge relabel plus live Ridge total in browser; 390 × 844 responsive control inspection; no browser console warnings/errors. Hosted GitHub Pages verification is pending deployment. |
+| Open limits | This remains a local, bounded constraint solver rather than a global roof-network optimizer. A grid point is a recommendation, not a measurement source; field verification is still required. |
+| Rollback | Tag `junction-solver-v1.5-2026-09-23` |
+
 ## Tolerance-bounded topology and multi-plane junction solver — September 23, 2026
 
 | Field | Record |
