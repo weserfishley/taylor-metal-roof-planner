@@ -1,5 +1,6 @@
 import {FT,planeData,project} from './geometry.mjs';
 import {wallPanelLayout} from './wall-panels.mjs';
+import {wallPoint,getWalls} from './walls.mjs';
 
 // Compatibility preview for browsers where WebGL is disabled. It deliberately
 // uses the same geographic plane data as the WebGL renderer, but is an SVG
@@ -13,11 +14,14 @@ export function createViewer(host){
   const faces=summary.rows.map(row=>({row,data:planeData(row.face,state.origin)}));
   for(const {data} of faces)for(const p of data.points){all.push(point(p.x,0,-p.y),point(p.x,data.height(p),-p.y))}
   for(const part of state.building?.parts||(state.building?.footprint?[state.building]:[]))for(const geo of part.footprint){const p=project(geo,state.origin);all.push(point(p.x,0,-p.y),point(p.x,part.wallHeight*FT,-p.y))}
+  for(const wall of getWalls(state))for(const p of [wall.a,wall.b])all.push(point(p.x,0,-p.y),point(p.x,wall.height*FT,-p.y));
   const xs=all.map(p=>p[0]),ys=all.map(p=>p[1]),minX=Math.min(...xs,0),maxX=Math.max(...xs,1),minY=Math.min(...ys,0),maxY=Math.max(...ys,1),scale=Math.min(760/(maxX-minX||1),430/(maxY-minY||1))*view.zoom,tx=450-(minX+maxX)*scale/2,ty=300-(minY+maxY)*scale/2;
   const screen=p=>`${(p[0]*scale+tx).toFixed(2)},${(p[1]*scale+ty).toFixed(2)}`;
   svg.append(make('rect',{width:900,height:560,fill:'#0a2032'}));svg.append(make('text',{x:24,y:34,fill:'#c5e3e9','font-size':16,'font-family':'system-ui'},'3D compatibility preview · WebGL unavailable'));
-  const wallLayout=wallPanelLayout(state),wallShapes=wallLayout.rows.map(row=>({row,shape:[projected(row.a.x,0,-row.a.y),projected(row.b.x,0,-row.b.y),projected(row.b.x,row.height*FT,-row.b.y),projected(row.a.x,row.height*FT,-row.a.y)]})).sort((a,b)=>b.shape.reduce((n,p)=>n+p.depth,0)-a.shape.reduce((n,p)=>n+p.depth,0));
-  for(const {row,shape}of wallShapes){svg.append(make('polygon',{points:shape.map(p=>screen([p.x,p.y])).join(' '),fill:wallLayout.settings.show?wallLayout.settings.color:'#6f8f9a',stroke:'#203f50','stroke-width':2}));if(wallLayout.settings.show)for(const panel of row.panels)svg.append(make('polyline',{'data-wall-panel':'true',points:[point(panel.a.x,0,-panel.a.y),point(panel.a.x,panel.height*FT,-panel.a.y),point(panel.b.x,panel.height*FT,-panel.b.y),point(panel.b.x,0,-panel.b.y)].map(screen).join(' '),fill:'none',stroke:'#d2e8ee','stroke-width':1}));}
+  const wallLayout=wallPanelLayout(state),wallShapes=wallLayout.rows.map(row=>({row,depth:(projected(row.a.x,0,-row.a.y).depth+projected(row.b.x,0,-row.b.y).depth)/2})).sort((a,b)=>b.depth-a.depth);
+  for(const {row}of wallShapes){const drawCell=(cell,panels)=>{const corners=[[cell.left,cell.bottom],[cell.right,cell.bottom],[cell.right,cell.top],[cell.left,cell.top]].map(([x,z])=>{const p=wallPoint(row,x,z);return point(p.x,p.y,p.z)});svg.append(make('polygon',{'data-wall-cell':'true',points:corners.map(screen).join(' '),fill:wallLayout.settings.show?wallLayout.settings.color:'#6f8f9a',stroke:panels?'#d2e8ee':'#526b78','stroke-width':panels?1:.3}))};if(wallLayout.settings.show){for(const panel of row.panels)for(const cell of panel.cells)drawCell(cell,true)}else{for(const cell of row.cells)drawCell(cell,false)}
+   for(const o of row.openings){const corners=[[o.offset,o.sill],[o.offset+o.width,o.sill],[o.offset+o.width,o.sill+o.height],[o.offset,o.sill+o.height],[o.offset,o.sill]].map(([x,z])=>{const p=wallPoint(row,x,z);return screen(point(p.x,p.y,p.z))});svg.append(make('polyline',{'data-opening':o.kind,points:corners.join(' '),fill:'none',stroke:o.kind==='Window'?'#78d6ed':'#edc383','stroke-width':2}))}
+  }
   const renderedFaces=faces.map(item=>({...item,shape:item.data.points.map(p=>projected(p.x,item.data.height(p),-p.y))})).sort((a,b)=>b.shape.reduce((n,p)=>n+p.depth,0)-a.shape.reduce((n,p)=>n+p.depth,0));
   for(const {row,data,shape} of renderedFaces){svg.append(make('polygon',{points:shape.map(p=>screen([p.x,p.y])).join(' '),fill:state.settings.color,stroke:'#d5f2ff','stroke-width':2}));if(showPanels)for(const panel of row.panels)svg.append(make('polyline',{points:[...panel.polygon,panel.polygon[0]].map(p=>screen(point(p.x,data.height(p)+.03,-p.y))).join(' '),fill:'none',stroke:'#c5e3e9','stroke-width':.8}));}
   host.replaceChildren(svg);

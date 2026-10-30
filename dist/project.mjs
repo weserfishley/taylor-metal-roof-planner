@@ -1,7 +1,8 @@
 import {project,validPolygon} from './geometry.mjs';
 import {wallPanelDefaults} from './wall-panels.mjs';
+import {getWalls,validateOpening} from './walls.mjs';
 
-export const PROJECT_VERSION=5;
+export const PROJECT_VERSION=6;
 export const EDGE_TYPES=['Unlabeled','Ridge','Hip','Valley','Rake','Eave','Flashing'];
 export const REPORT_EDGE_TYPES=['Ridge','Hip','Valley','Rake','Eave'];
 const FACE_TYPES=['Main roof','Dormer','Porch','Garage'];
@@ -10,7 +11,7 @@ const finite=(value,min,max,name)=>{const number=Number(value);if(!Number.isFini
 const id=(value,prefix,index,used)=>{let next=cleanText(value,100);if(!next||used.has(next))next=`${prefix}-${index+1}-${Math.random().toString(36).slice(2,10)}`;used.add(next);return next};
 
 export function createProjectState(){
- return {version:PROJECT_VERSION,address:'',origin:{lat:44.9385,lng:-123.0303},outlines:[],faces:[],building:null,settings:{width:16,maxLength:32,allowance:0,color:'#477785',autoSnap:true,snapTolerance:6,gridSnap:true},materials:{panelType:'Standing seam',gauge:'26 ga',colorName:'Slate blue'},customer:{name:'',company:'',phone:'',email:''},quote:{projectName:'',number:'',date:new Date().toISOString().slice(0,10),validUntil:'',taxRate:0,materialPricePerSqFt:0,trimPrices:{Ridge:0,Hip:0,Valley:0,Rake:0,Eave:0},accessories:[],notes:''},panelOverrides:[],ui:{step:1,view:'map',showPanels:false,selectedFaceId:null,selectedOutlineId:null,selectedEdge:null,map:null,camera:null}};
+ return {version:PROJECT_VERSION,address:'',origin:{lat:44.9385,lng:-123.0303},outlines:[],faces:[],building:null,walls:[],wallOpenings:[],settings:{width:16,maxLength:32,allowance:0,color:'#477785',autoSnap:true,snapTolerance:6,gridSnap:true},materials:{panelType:'Standing seam',gauge:'26 ga',colorName:'Slate blue'},customer:{name:'',company:'',phone:'',email:''},quote:{projectName:'',number:'',date:new Date().toISOString().slice(0,10),validUntil:'',taxRate:0,materialPricePerSqFt:0,trimPrices:{Ridge:0,Hip:0,Valley:0,Rake:0,Eave:0},accessories:[],notes:''},panelOverrides:[],ui:{step:1,view:'map',showPanels:false,selectedFaceId:null,selectedOutlineId:null,selectedEdge:null,map:null,camera:null}};
 }
 
 export function snapshotProject(state,ui={}){
@@ -22,7 +23,7 @@ export function snapshotProject(state,ui={}){
 
 export function parseProject(input){
  const raw=typeof input==='string'?JSON.parse(input):structuredClone(input);
- if(!raw||![2,3,4,5].includes(raw.version)||!Array.isArray(raw.faces))throw Error('Unsupported or missing project-file version');
+ if(!raw||![2,3,4,5,6].includes(raw.version)||!Array.isArray(raw.faces))throw Error('Unsupported or missing project-file version');
  if(raw.faces.length>100)throw Error('Project has too many roof planes');
  const origin={lat:finite(raw.origin?.lat,-85,85,'project latitude'),lng:finite(raw.origin?.lng,-180,180,'project longitude')};
  const validatePoints=(points,label)=>{
@@ -55,5 +56,12 @@ export function parseProject(input){
  if(raw.building?.parts){if(!Array.isArray(raw.building.parts)||raw.building.parts.length>50)throw Error('Too many building sections');building={kind:'multi-gable',parts:raw.building.parts.map((part,index)=>({id:cleanText(part.id,100)||`section-${index}`,name:cleanText(part.name,80)||'Building section',wallHeight:finite(part.wallHeight,0,200,'wall height'),footprint:validatePoints(part.footprint,'Section footprint')}))}}
  else if(raw.building?.footprint)building={kind:'gable',wallHeight:finite(raw.building.wallHeight,0,200,'wall height'),footprint:validatePoints(raw.building.footprint,'House footprint')};
  const sourceWall=raw.wallPanels||wallPanelDefaults,wallPanels={show:Boolean(sourceWall.show),width:finite(sourceWall.width??36,1,120,'wall panel coverage'),maxLength:finite(sourceWall.maxLength??20,1,200,'wall panel maximum length'),allowance:finite(sourceWall.allowance??0,0,48,'wall panel allowance'),color:/^#[a-f\d]{6}$/i.test(sourceWall.color||'')?sourceWall.color:wallPanelDefaults.color};
- return {wallPanels,version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,building,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
+ const point=p=>({lat:finite(p?.lat,-85,85,'wall latitude'),lng:finite(p?.lng,-180,180,'wall longitude')});
+ if(raw.walls!==undefined&&(!Array.isArray(raw.walls)||raw.walls.length>100))throw Error('Invalid standalone walls');
+ const wallIds=new Set(),walls=(raw.walls||[]).map((wall,i)=>({id:id(wall.id,'wall',i,wallIds),name:cleanText(wall.name,80)||'Wall',height:finite(wall.height,1,200,'wall height'),a:point(wall.a),b:point(wall.b)}));
+ if(raw.wallOpenings!==undefined&&(!Array.isArray(raw.wallOpenings)||raw.wallOpenings.length>200))throw Error('Invalid wall openings');
+ const wallOpenings=[],allWalls=getWalls({building,walls,origin});
+ for(const wall of allWalls.filter(w=>walls.some(x=>x.id===w.id)))if(wall.widthFeet<.99||wall.widthFeet>500.01)throw Error('Invalid standalone wall length');
+ for(const o of raw.wallOpenings||[]){const wall=allWalls.find(w=>w.id===o.wallId);if(!wall)throw Error('Opening references a missing wall');const opening={id:cleanText(o.id,100)||'opening-'+wallOpenings.length,wallId:wall.id,kind:o.kind==='Window'?'Window':'Door',offset:finite(o.offset,0,10000,'opening offset'),width:finite(o.width,.01,500,'opening width'),height:finite(o.height,.01,200,'opening height'),sill:finite(o.sill,0,200,'opening sill')};validateOpening(wall,opening,wallOpenings);wallOpenings.push(opening)}
+ return {walls,wallOpenings,wallPanels,version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,building,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
 }

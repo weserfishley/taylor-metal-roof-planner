@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {unproject} from './dist/geometry.mjs';
+import {createProjectState,snapshotProject,parseProject} from './dist/project.mjs';
+import {getWalls,wallCells,validateOpening} from './dist/walls.mjs';
+import {wallPanelLayout} from './dist/wall-panels.mjs';
+const state=createProjectState(),geo=(x,y)=>unproject({x:x*.3048,y:y*.3048},state.origin);
+state.walls=[{id:'a',name:'Garage addition',height:10,a:geo(0,0),b:geo(20,0)},{id:'b',name:'Return wall',height:10,a:geo(20,0),b:geo(20,12)}];
+state.wallOpenings=[{id:'door',wallId:'a',kind:'Door',offset:2,width:3,height:7,sill:0},{id:'window',wallId:'a',kind:'Window',offset:9,width:4,height:4,sill:3}];
+const walls=getWalls(state),cells=wallCells(walls[0]);assert.ok(Math.abs(cells.reduce((n,c)=>n+(c.right-c.left)*(c.top-c.bottom),0)-163)<1e-6);
+assert.ok(Math.abs(wallPanelLayout(state).area-283)<1e-6);
+for(const c of cells)for(const o of state.wallOpenings)assert.ok(c.right<=o.offset+1e-6||c.left>=o.offset+o.width-1e-6||c.top<=o.sill+1e-6||c.bottom>=o.sill+o.height-1e-6);
+assert.throws(()=>validateOpening(walls[0],{offset:19,width:3,height:7,sill:0}),/fit/);
+assert.throws(()=>validateOpening(walls[0],{offset:3,width:3,height:7,sill:0},state.wallOpenings),/overlaps/);
+const restored=parseProject(JSON.stringify(snapshotProject(state)));assert.deepEqual(restored.walls,state.walls);assert.deepEqual(restored.wallOpenings,state.wallOpenings);
+assert.throws(()=>parseProject({...snapshotProject(state),wallOpenings:[{...state.wallOpenings[0],wallId:'missing'}]}),/missing wall/);
+console.log('PASS: standalone attached walls, net door/window area, hole-free wall cells, invalid/overlapping openings, and project round trip');

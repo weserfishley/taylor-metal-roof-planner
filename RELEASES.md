@@ -1,5 +1,17 @@
 # Release record
 
+## Independent walls and measured openings — October 30, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Typed standalone walls; initial attachment to existing structure wall endpoints; measured doors/windows on generated or standalone walls; opening removal, standalone-wall removal and Undo; map wall lines; 3D surface cutouts and frames. |
+| Risk class | R3 — geometry, opening deductions, and project schema. |
+| Data model | Version 6 stores independent geographic wall endpoints and wallOpenings keyed to stable wall IDs. Versions 2–5 remain readable. Imported malformed, missing-wall, outside-wall and overlapping openings are rejected. |
+| Calculation | Net wall surface is decomposed around rectangular openings. Panel layout cells exclude holes; conservative full-height blanks with cutouts remain the ordering basis. Shared interior walls remain included. |
+| Verification | PASS: geometry, project, section, wall-panel and new wall/opening fixtures; explicit 20 × 10 ft wall minus 3 × 7 door and 4 × 4 window gives 163 sq ft net area; serialized walls/openings round trip; local browser added a door and window to an existing house wall, attached a standalone return wall, and verified both visible openings after rotating compatibility 3D. Browser file round trip, small-screen interaction and WebGL visual rendering NOT VERIFIED for this local build. |
+| Limits | No automatic attachment propagation, extension-roof creation, framing, trim quantities, glass/door objects, door swings, or PDF/CSV wall integration. Existing generated wall dimensions still follow their saved footprint. Local build only. |
+| Rollback | Commit 1fbfa12 / tag wall-panels-v1.9-2026-10-30. |
+
 ## Vertical wall panel layouts — October 30, 2026
 
 | Field | Record |
