@@ -13,9 +13,11 @@ Live app: https://weserfishley.github.io/taylor-metal-roof-planner/
 5. Set the pitch and downslope direction for every plane. Shared edges are checked against both pitched plane equations before the 3D model is trusted.
 6. Choose effective panel coverage and review estimated lengths and quantities.
 
+For a typed starting point, choose **Build by dimensions** and enter the house width, depth, wall/eave height, and pitch. It creates a centered, editable gable-house template with two connected roof planes and labeled ridge, eaves, and rakes. You can then drag the points, type individual line measurements, relabel edges, and adjust each plane just like a traced roof.
+
 Connected roof planes share their snapped vertices. Drag a corner, the diamond edge handle, or the center move handle to refine the roof while keeping adjoining geometry connected. With **Keep connected planes snapped** enabled, nearby vertices and vertices close to an adjoining edge become shared topology within the configurable 0.5–24 inch tolerance. Geometry edits then reconcile safe nonparallel shared-edge intersections, and corners shared by three or more planes are solved as one XYZ junction. The solver preserves entered pitch and eave elevation, limits automatic horizontal movement to six feet per pass, and leaves offset, oversized, rank-deficient, or invalid constraints highlighted by plane and edge name for manual review. Predictive snapping prioritizes shared roof points, roof edges/intersections, the outline, then optional 1-foot grid recommendations; the preview shows the landing point and Auto Snap can be temporarily bypassed with Alt.
 
-Project-file version 4 restores the complete editable session: outlines, planes, stable object IDs, roof-line labels, pitch, panel/material settings, customer and quote information, map position, workflow step, selected geometry, panel visibility, and 3D camera. Version 2 and version 3 files remain readable and are upgraded when saved again.
+Project-file version 5 restores the complete editable session: outlines, planes, generated-building footprint and wall height, stable object IDs, roof-line labels, pitch, panel/material settings, customer and quote information, map position, workflow step, selected geometry, panel visibility, and 3D camera. Version 2 through version 4 files remain readable and are upgraded when saved again.
 
 The live takeoff displays combined ridge, hip, valley, rake, and eave lengths. The customer-report workflow uses those same live calculations for pricing and produces print-ready quote, material, panel-layout, and full-project report options. Reports may include five 3D perspectives with the calculated panel layout; use the browser print window to save the result as PDF.
 
@@ -23,7 +25,7 @@ The application uses Esri aerial imagery and address autocomplete plus OpenStree
 
 ## Important limitation
 
-This application produces aerial estimates, not surveys, structural calculations, code determinations, or fabrication approval. Automatic reconciliation first repairs only small, tolerance-bounded 2D gaps, then evaluates the mathematical pitched-plane intersections while preserving each plane’s entered pitch. It does not globally optimize arbitrary overlapping surfaces or silently alter protected measurements. Over-constrained, rank-deficient, oversized, or invalid junctions remain visibly flagged. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
+This application produces aerial estimates and editable templates, not surveys, structural calculations, code determinations, or fabrication approval. The typed house builder is a gable starter only; it does not design framing or certify wall, roof, or intersection dimensions. Automatic reconciliation first repairs only small, tolerance-bounded 2D gaps, then evaluates the mathematical pitched-plane intersections while preserving each plane’s entered pitch. It does not globally optimize arbitrary overlapping surfaces or silently alter protected measurements. Over-constrained, rank-deficient, oversized, or invalid junctions remain visibly flagged. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
 
 ## Project structure
 

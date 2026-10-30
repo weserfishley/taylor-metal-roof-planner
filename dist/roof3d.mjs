@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import {planeData,FT,junctionReport,vertexJunctionReport,planeEquation} from './geometry.mjs';
+import {planeData,FT,project,junctionReport,vertexJunctionReport,planeEquation} from './geometry.mjs';
 export function createViewer(host){
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor('#0a2032');renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;host.append(renderer.domElement);
  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(40,1,.01,100000);scene.fog=new THREE.Fog(0x0a2032,180,1200);scene.add(new THREE.HemisphereLight(0xd9f4ff,0x172838,2.15));const sun=new THREE.DirectionalLight(0xfff4df,3);sun.position.set(60,110,45);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-250;sun.shadow.camera.right=250;sun.shadow.camera.top=250;sun.shadow.camera.bottom=-250;scene.add(sun);
@@ -16,6 +16,7 @@ export function createViewer(host){
  // Vertical reference lines make the entered low-edge height visible.
  for(const p of data.points)line([new THREE.Vector3(p.x,0,-p.y),to3(p)],0x274a60);
  }
+ if(state.building?.footprint?.length>=3){const wallTop=state.building.wallHeight*FT,points=state.building.footprint.map(p=>project(p,state.origin));for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute([a.x,0,-a.y,b.x,0,-b.y,b.x,wallTop,-b.y,a.x,wallTop,-a.y],3));geometry.setIndex([0,1,2,0,2,3]);geometry.computeVertexNormals();const wall=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:0x8ba4ad,roughness:.8,side:THREE.DoubleSide}));wall.castShadow=true;wall.receiveShadow=true;group.add(wall)}}
  // Validate each shared seam against both pitched plane equations. Conflicts
  // stay visible instead of being hidden by moving user-authored geometry.
  for(const joint of joints){const left=faceData.get(joint.left.face.id),right=faceData.get(joint.right.face.id),color=joint.status==='aligned'?0x58e3a5:joint.status==='offset'?0xffc44d:0xff5573,toAverage=p=>new THREE.Vector3(p.x,(left.height(p)+right.height(p))/2+.06,-p.y);line([toAverage(joint.a),toAverage(joint.b)],color,3);if(joint.status!=='aligned')for(const p of [joint.a,joint.b])line([new THREE.Vector3(p.x,left.height(p),-p.y),new THREE.Vector3(p.x,right.height(p),-p.y)],0xff5573,3)}

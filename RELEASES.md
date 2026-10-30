@@ -1,5 +1,17 @@
 # Release record
 
+## Typed gable-house builder — October 30, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | A **Build by dimensions** workflow for a width, depth, wall/eave height, and pitch input; two connected editable gable roof planes; immediate ridge/eave/rake labeling; saved building footprint/wall-height state; and simple 3D exterior walls beneath the generated roof. |
+| Risk class | R3 — generated topology, project schema, 3D presentation, and dependent estimates. |
+| Geometry rule | Inputs create a north/south gable template centered on the current map view. The shared ridge is represented by common geographic vertices and is accepted only when the two entered pitched surfaces align. Every generated point, edge, and plane remains editable through the established drawing tools. |
+| Data model | Project-file version 5 adds an optional `building` footprint and wall/eave-height record. Versions 2–4 load with no generated-building record and retain their existing geometry. |
+| Safety rule | The builder is a geometric starter, not a framing, structural, survey, code, fabrication, or field-verification tool. It does not alter an entered pitch or size to force a junction. |
+| Verification | PASS locally: JavaScript syntax; deterministic 40 × 30 ft template fixture with correct 1,200 sq ft footprint, sloped surface, edge labels, and aligned shared ridge; version-5 save/load fixture; browser generation from typed 48 × 32 ft, 11 ft wall, 7/12 pitch inputs produced two editable 889 sq ft planes, 1,536 sq ft plan area, one aligned 3D junction, 48 ft ridge, 96 ft eaves, and 72 calculated panels. The headless test browser cannot render WebGL, so generated 3D walls are NOT VERIFIED visually. Hosted GitHub Pages is unchanged and NOT VERIFIED for this local change. |
+| Rollback | Published commit `f68b69d` / tag `predictive-snapping-v1.6-2026-09-28` |
+
 ## Predictive roof snapping and immediate edge editing — September 28, 2026
 
 | Field | Record |

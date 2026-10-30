@@ -7,6 +7,12 @@ export function unproject(p,origin){return {lat:origin.lat+p.y/R*180/Math.PI,lng
 export function area(p){return Math.abs(p.reduce((a,v,i)=>{const w=p[(i+1)%p.length];return a+v.x*w.y-w.x*v.y},0)/2);}
 export function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 export function slopeFactor(pitch){return Math.hypot(12,pitch)/12;}
+export function gableHouseTemplate({widthFeet,depthFeet,pitch,eaveHeight}){
+ const width=Number(widthFeet)*FT,depth=Number(depthFeet)*FT,rise=Number(pitch),eave=Number(eaveHeight);
+ if(![width,depth,rise,eave].every(Number.isFinite)||width<4*FT||depth<4*FT||rise<0||rise>24||eave<0||eave>200)throw Error('Enter a valid house width, depth, pitch, and wall height.');
+ const nw={x:-width/2,y:-depth/2},ne={x:width/2,y:-depth/2},se={x:width/2,y:depth/2},sw={x:-width/2,y:depth/2},rw={x:-width/2,y:0},re={x:width/2,y:0};
+ return {footprint:[nw,ne,se,sw],wallHeight:eave,faces:[{name:'North roof plane',type:'Main roof',pitch:rise,bearing:0,eave,points:[nw,ne,re,rw],edges:['Eave','Rake','Ridge','Rake']},{name:'South roof plane',type:'Main roof',pitch:rise,bearing:180,eave,points:[rw,re,se,sw],edges:['Ridge','Rake','Eave','Rake']}]};
+}
 export function axes(bearing){const a=rad(bearing);return {u:{x:Math.cos(a),y:-Math.sin(a)},v:{x:Math.sin(a),y:Math.cos(a)}};}
 export function toUV(p,b){const {u,v}=axes(b);return {x:p.x*u.x+p.y*u.y,y:p.x*v.x+p.y*v.y};}
 export function fromUV(p,b){const {u,v}=axes(b);return {x:p.x*u.x+p.y*v.x,y:p.x*u.y+p.y*v.y};}

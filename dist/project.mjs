@@ -1,6 +1,6 @@
 import {project,validPolygon} from './geometry.mjs';
 
-export const PROJECT_VERSION=4;
+export const PROJECT_VERSION=5;
 export const EDGE_TYPES=['Unlabeled','Ridge','Hip','Valley','Rake','Eave','Flashing'];
 export const REPORT_EDGE_TYPES=['Ridge','Hip','Valley','Rake','Eave'];
 const FACE_TYPES=['Main roof','Dormer','Porch','Garage'];
@@ -9,7 +9,7 @@ const finite=(value,min,max,name)=>{const number=Number(value);if(!Number.isFini
 const id=(value,prefix,index,used)=>{let next=cleanText(value,100);if(!next||used.has(next))next=`${prefix}-${index+1}-${Math.random().toString(36).slice(2,10)}`;used.add(next);return next};
 
 export function createProjectState(){
- return {version:PROJECT_VERSION,address:'',origin:{lat:44.9385,lng:-123.0303},outlines:[],faces:[],settings:{width:16,maxLength:32,allowance:0,color:'#477785',autoSnap:true,snapTolerance:6,gridSnap:true},materials:{panelType:'Standing seam',gauge:'26 ga',colorName:'Slate blue'},customer:{name:'',company:'',phone:'',email:''},quote:{projectName:'',number:'',date:new Date().toISOString().slice(0,10),validUntil:'',taxRate:0,materialPricePerSqFt:0,trimPrices:{Ridge:0,Hip:0,Valley:0,Rake:0,Eave:0},accessories:[],notes:''},panelOverrides:[],ui:{step:1,view:'map',showPanels:false,selectedFaceId:null,selectedOutlineId:null,selectedEdge:null,map:null,camera:null}};
+ return {version:PROJECT_VERSION,address:'',origin:{lat:44.9385,lng:-123.0303},outlines:[],faces:[],building:null,settings:{width:16,maxLength:32,allowance:0,color:'#477785',autoSnap:true,snapTolerance:6,gridSnap:true},materials:{panelType:'Standing seam',gauge:'26 ga',colorName:'Slate blue'},customer:{name:'',company:'',phone:'',email:''},quote:{projectName:'',number:'',date:new Date().toISOString().slice(0,10),validUntil:'',taxRate:0,materialPricePerSqFt:0,trimPrices:{Ridge:0,Hip:0,Valley:0,Rake:0,Eave:0},accessories:[],notes:''},panelOverrides:[],ui:{step:1,view:'map',showPanels:false,selectedFaceId:null,selectedOutlineId:null,selectedEdge:null,map:null,camera:null}};
 }
 
 export function snapshotProject(state,ui={}){
@@ -21,7 +21,7 @@ export function snapshotProject(state,ui={}){
 
 export function parseProject(input){
  const raw=typeof input==='string'?JSON.parse(input):structuredClone(input);
- if(!raw||![2,3,4].includes(raw.version)||!Array.isArray(raw.faces))throw Error('Unsupported or missing project-file version');
+ if(!raw||![2,3,4,5].includes(raw.version)||!Array.isArray(raw.faces))throw Error('Unsupported or missing project-file version');
  if(raw.faces.length>100)throw Error('Project has too many roof planes');
  const origin={lat:finite(raw.origin?.lat,-85,85,'project latitude'),lng:finite(raw.origin?.lng,-180,180,'project longitude')};
  const validatePoints=(points,label)=>{
@@ -50,5 +50,6 @@ export function parseProject(input){
  const selectedFaceId=faces.some(face=>face.id===sourceUi.selectedFaceId)?sourceUi.selectedFaceId:null,selectedOutlineId=outlines.some(outline=>outline.id===sourceUi.selectedOutlineId)?sourceUi.selectedOutlineId:null;
  const camera=sourceUi.camera&&['target','radius','theta','phi'].every(key=>key==='target'||Number.isFinite(Number(sourceUi.camera[key])))?{target:{x:finite(sourceUi.camera.target?.x,-100000,100000,'camera target x'),y:finite(sourceUi.camera.target?.y,-100000,100000,'camera target y'),z:finite(sourceUi.camera.target?.z,-100000,100000,'camera target z')},radius:finite(sourceUi.camera.radius,1,10000,'camera radius'),theta:finite(sourceUi.camera.theta,-1000,1000,'camera angle'),phi:finite(sourceUi.camera.phi,.01,Math.PI/2,'camera elevation')}:null;
  const ui={step:Math.round(finite(sourceUi.step??1,1,5,'workflow step')),view:views.includes(sourceUi.view)?sourceUi.view:'map',showPanels:Boolean(sourceUi.showPanels),selectedFaceId,selectedOutlineId,selectedEdge:cleanText(sourceUi.selectedEdge,200)||null,map:mapState,camera};
- return {version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
+ const building=raw.building?.footprint?{kind:'gable',wallHeight:finite(raw.building.wallHeight,0,200,'wall height'),footprint:validatePoints(raw.building.footprint,'House footprint')} : null;
+ return {version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,building,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
 }

@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import {FT,area,distance,project,unproject,validPolygon,planeData,planeEquation,junctionReport,vertexJunctionReport,solvePlaneJunctions,panelLayout,summarize,edgeSurfaceLength,resizeEdgeEndpoint} from './dist/geometry.mjs';
+import {FT,area,distance,project,unproject,validPolygon,planeData,planeEquation,junctionReport,vertexJunctionReport,solvePlaneJunctions,panelLayout,summarize,edgeSurfaceLength,resizeEdgeEndpoint,gableHouseTemplate} from './dist/geometry.mjs';
 const origin={lat:45,lng:-123};
 const points=[{x:0,y:0},{x:40*FT,y:0},{x:40*FT,y:20*FT},{x:0,y:20*FT}];
 const face={id:'A',name:'40 × 20',points:points.map(p=>unproject(p,origin)),pitch:6,bearing:0,eave:10};
 const settings={width:16,maxLength:32,allowance:0};
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-5,`${a} != ${b}`);
+const generated=gableHouseTemplate({widthFeet:40,depthFeet:30,pitch:6,eaveHeight:10}),generatedFaces=generated.faces.map((item,index)=>({...item,id:`generated-${index}`,points:item.points.map(point=>unproject(point,origin))}));assert.equal(generated.faces.length,2);close(area(generated.footprint)/FT**2,1200);assert.deepEqual(generated.faces.map(face=>face.edges),[['Eave','Rake','Ridge','Rake'],['Ridge','Rake','Eave','Rake']]);close(planeData(generatedFaces[0],origin).surface/FT**2,600*Math.sqrt(1.25));assert.equal(junctionReport(generatedFaces,origin)[0].status,'aligned');
 close(area(points)/FT**2,800);close(planeData(face,origin).surface/FT**2,800*Math.sqrt(1.25));
 let p=panelLayout(face,origin,settings);assert.equal(p.length,30);assert.ok(p.every(x=>x.length===22.416666666666668));
 p=panelLayout(face,origin,{...settings,width:12});assert.equal(p.length,40);
