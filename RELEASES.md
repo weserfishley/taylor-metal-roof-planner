@@ -1,5 +1,16 @@
 # Release record
 
+## Multiple named building sections — October 30, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Repeated typed section generation for bedroom, living room, garage, dining room, den, family room, office, and custom additions; independent dimensions, pitch, eave height and X/Y placement; multiple wall footprints in both 3D renderers. |
+| Risk class | R3 — generated geometry and project data. |
+| Data | Version 5 adds optional building.parts; single-footprint version-5 projects remain readable. Geographic coordinates remain authoritative for roofs. |
+| Verification | PASS: syntax, existing geometry and project suites; three-section fixture with placement, heights, aggregate area, and complete part preservation; local browser added bedroom and garage, displayed both in compatibility 3D, downloaded project and reopened it with all four named planes intact. Small-screen interaction and WebGL visual rendering NOT VERIFIED. Public site unchanged. |
+| Limits | Independent gable masses do not automatically merge overlapping roofs or remove interior walls. Manual roof edits do not propagate to rectangular wall footprints. This is a local testing build. |
+| Rollback | Commit 6e56755 / tag gable-ridge-correction-v1.7.3-2026-10-30. |
+
 ## Correct gable ridge orientation — October 30, 2026
 
 | Field | Record |

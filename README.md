@@ -27,6 +27,8 @@ The application uses Esri aerial imagery and address autocomplete plus OpenStree
 
 ## Important limitation
 
+Use **Add building section** repeatedly to create Bedroom, Living room, Garage, Dining room, Den, Family room, Office, or Custom addition sections. Each has width, depth, wall/eave height, pitch, and X/Y placement measured in feet from the project origin. Each generates two editable gable roof planes and a saved rectangular wall footprint. Sections are building masses, not interior room partitions. Overlapping roof planes are not automatically trimmed into a combined roof; edit intersections before using a takeoff. Roof-point edits do not automatically reshape the stored wall footprint.
+
 This application produces aerial estimates and editable templates, not surveys, structural calculations, code determinations, or fabrication approval. The typed house builder is a gable starter only; it does not design framing or certify wall, roof, or intersection dimensions. Automatic reconciliation first repairs only small, tolerance-bounded 2D gaps, then evaluates the mathematical pitched-plane intersections while preserving each plane’s entered pitch. It does not globally optimize arbitrary overlapping surfaces or silently alter protected measurements. Over-constrained, rank-deficient, oversized, or invalid junctions remain visibly flagged. Verify pitch and critical dimensions in the field and have the selected manufacturer or fabricator review the order before purchasing material.
 
 ## Project structure

@@ -7,11 +7,11 @@ export function unproject(p,origin){return {lat:origin.lat+p.y/R*180/Math.PI,lng
 export function area(p){return Math.abs(p.reduce((a,v,i)=>{const w=p[(i+1)%p.length];return a+v.x*w.y-w.x*v.y},0)/2);}
 export function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 export function slopeFactor(pitch){return Math.hypot(12,pitch)/12;}
-export function gableHouseTemplate({widthFeet,depthFeet,pitch,eaveHeight}){
- const width=Number(widthFeet)*FT,depth=Number(depthFeet)*FT,rise=Number(pitch),eave=Number(eaveHeight);
- if(![width,depth,rise,eave].every(Number.isFinite)||width<4*FT||depth<4*FT||rise<0||rise>24||eave<0||eave>200)throw Error('Enter a valid house width, depth, pitch, and wall height.');
- const nw={x:-width/2,y:-depth/2},ne={x:width/2,y:-depth/2},se={x:width/2,y:depth/2},sw={x:-width/2,y:depth/2},rw={x:-width/2,y:0},re={x:width/2,y:0};
- return {footprint:[nw,ne,se,sw],wallHeight:eave,faces:[{name:'North roof plane',type:'Main roof',pitch:rise,bearing:180,eave,points:[nw,ne,re,rw],edges:['Eave','Rake','Ridge','Rake']},{name:'South roof plane',type:'Main roof',pitch:rise,bearing:0,eave,points:[rw,re,se,sw],edges:['Ridge','Rake','Eave','Rake']}]};
+export function gableHouseTemplate({widthFeet,depthFeet,pitch,eaveHeight,centerXFeet=0,centerYFeet=0,name='Main house'}){
+ const width=Number(widthFeet)*FT,depth=Number(depthFeet)*FT,rise=Number(pitch),eave=Number(eaveHeight),cx=Number(centerXFeet)*FT,cy=Number(centerYFeet)*FT;
+ if(![width,depth,rise,eave,cx,cy].every(Number.isFinite)||width<4*FT||depth<4*FT||rise<0||rise>24||eave<0||eave>200||Math.abs(cx)>2000*FT||Math.abs(cy)>2000*FT)throw Error('Enter valid section dimensions, pitch, wall height, and placement.');
+ const nw={x:cx-width/2,y:cy-depth/2},ne={x:cx+width/2,y:cy-depth/2},se={x:cx+width/2,y:cy+depth/2},sw={x:cx-width/2,y:cy+depth/2},rw={x:cx-width/2,y:cy},re={x:cx+width/2,y:cy};
+ return {footprint:[nw,ne,se,sw],wallHeight:eave,faces:[{name:`${name} — north roof`,type:'Main roof',pitch:rise,bearing:180,eave,points:[nw,ne,re,rw],edges:['Eave','Rake','Ridge','Rake']},{name:`${name} — south roof`,type:'Main roof',pitch:rise,bearing:0,eave,points:[rw,re,se,sw],edges:['Ridge','Rake','Eave','Rake']}]};
 }
 export function axes(bearing){const a=rad(bearing);return {u:{x:Math.cos(a),y:-Math.sin(a)},v:{x:Math.sin(a),y:Math.cos(a)}};}
 export function toUV(p,b){const {u,v}=axes(b);return {x:p.x*u.x+p.y*u.y,y:p.x*v.x+p.y*v.y};}
