@@ -4,7 +4,7 @@
 
 | Field | Record |
 | --- | --- |
-| Scope | SVG isometric 3D fallback when the primary WebGL viewer cannot initialize. It renders the same plane surfaces, pitch-derived heights, generated walls, and optional panel outlines used by the current project state. |
+| Scope | SVG isometric 3D fallback when the primary WebGL viewer cannot initialize. It renders the same plane surfaces, pitch-derived heights, generated walls, and optional panel outlines used by the current project state, with drag rotation and scroll/pinch zoom. |
 | Risk class | R2 — rendering fallback only; it does not write geometry or alter estimation inputs. |
 | Behavior | The primary WebGL viewer remains preferred. On initialization failure, the application shows an explicit compatibility-preview notice instead of a blank/unavailable 3D area. 3D report image capture remains a WebGL-only capability. |
 | Verification | PASS locally: JavaScript syntax and geometry/project suites; a generated 40 × 30 ft, 6/12 gable house switched from a failed WebGL renderer to the visible compatibility 3D preview in the in-app browser. Hosted GitHub Pages is unchanged. |
