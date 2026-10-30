@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {FT,gableHouseTemplate,unproject,project,planeEquation,planeData,summarize,junctionReport} from './dist/geometry.mjs';
+import {addRoofOverhang,roofTrimLayout,trimDefaults} from './dist/roof-trim.mjs';
+import {createProjectState,snapshotProject,parseProject} from './dist/project.mjs';
+const state=createProjectState(),template=gableHouseTemplate({widthFeet:40,depthFeet:30,pitch:6,eaveHeight:10});
+state.faces=template.faces.map((f,i)=>({...f,id:'face-'+i,points:f.points.map(p=>unproject(p,state.origin))}));
+const original=structuredClone(state.faces),equations=original.map(f=>planeEquation(f,state.origin));
+state.faces=addRoofOverhang(state.faces,state.origin,'face-0',0,12);
+assert.ok(Math.abs(summarize(state.faces,state.origin,state.settings).flat-1240)<1e-5);
+assert.equal(state.faces[0].pitch,6);assert.ok(Math.abs(state.faces[0].eave-9.5)<1e-5);
+assert.ok(Math.abs(state.faces[0].points[0].lat-original[0].points[0].lat)>0);
+for(let i=0;i<2;i++)for(const geo of state.faces[i].points){const p=project(geo,state.origin);assert.ok(Math.abs(planeData(state.faces[i],state.origin).height(p)-equations[i].height(p))<1e-6)}
+state.faces=addRoofOverhang(state.faces,state.origin,'face-0',3,12);
+assert.ok(Math.abs(summarize(state.faces,state.origin,state.settings).flat-1271)<1e-5);
+assert.equal(junctionReport(state.faces,state.origin)[0].status,'aligned');
+assert.ok(Math.abs(project(state.faces[1].points[0],state.origin).x/FT+21)<1e-5);
+assert.throws(()=>addRoofOverhang(original,state.origin,'face-0',2,12),/Eave or Rake/);
+assert.throws(()=>addRoofOverhang(original,state.origin,'face-0',0,100),/48 inches/);
+state.trim={...trimDefaults,eave:true,fascia:true};const t=roofTrimLayout(state);
+assert.ok(Math.abs(t.eave-82)<1e-5);assert.equal(t.eavePieces,10);assert.ok(t.fascia>t.eave);assert.equal(t.segments.length,8);
+const restored=parseProject(JSON.stringify(snapshotProject(state)));assert.deepEqual(restored.trim,state.trim);assert.deepEqual(restored.faces,state.faces);
+assert.throws(()=>parseProject({...snapshotProject(state),trim:{fasciaDepth:99}}),/fascia/);
+console.log('PASS: eave/rake overhangs, preserved pitched surfaces, shared ridge, trim lengths/pieces, invalid offsets, and project round trip');

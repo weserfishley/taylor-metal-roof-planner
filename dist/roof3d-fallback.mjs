@@ -1,6 +1,7 @@
 import {FT,planeData,project} from './geometry.mjs';
 import {wallPanelLayout} from './wall-panels.mjs';
 import {wallPoint,getWalls} from './walls.mjs';
+import {roofTrimLayout} from './roof-trim.mjs';
 
 // Compatibility preview for browsers where WebGL is disabled. It deliberately
 // uses the same geographic plane data as the WebGL renderer, but is an SVG
@@ -22,8 +23,8 @@ export function createViewer(host){
   for(const {row}of wallShapes){const drawCell=(cell,panels)=>{const corners=[[cell.left,cell.bottom],[cell.right,cell.bottom],[cell.right,cell.top],[cell.left,cell.top]].map(([x,z])=>{const p=wallPoint(row,x,z);return point(p.x,p.y,p.z)});svg.append(make('polygon',{'data-wall-cell':'true','data-wall-id':row.id,points:corners.map(screen).join(' '),fill:wallLayout.settings.show?wallLayout.settings.color:'#6f8f9a',stroke:panels?'#d2e8ee':'#526b78','stroke-width':panels?1:.3}))};if(wallLayout.settings.show){for(const panel of row.panels)for(const cell of panel.cells)drawCell(cell,true)}else{for(const cell of row.cells)drawCell(cell,false)}
    for(const o of row.openings){const corners=[[o.offset,o.sill],[o.offset+o.width,o.sill],[o.offset+o.width,o.sill+o.height],[o.offset,o.sill+o.height],[o.offset,o.sill]].map(([x,z])=>{const p=wallPoint(row,x,z);return screen(point(p.x,p.y,p.z))});svg.append(make('polyline',{'data-opening':o.kind,points:corners.join(' '),fill:'none',stroke:o.kind==='Window'?'#78d6ed':'#edc383','stroke-width':2}))}
   }
-  const renderedFaces=faces.map(item=>({...item,shape:item.data.points.map(p=>projected(p.x,item.data.height(p),-p.y))})).sort((a,b)=>b.shape.reduce((n,p)=>n+p.depth,0)-a.shape.reduce((n,p)=>n+p.depth,0));
-  for(const {row,data,shape} of renderedFaces){svg.append(make('polygon',{points:shape.map(p=>screen([p.x,p.y])).join(' '),fill:state.settings.color,stroke:'#d5f2ff','stroke-width':2}));if(showPanels)for(const panel of row.panels)svg.append(make('polyline',{points:[...panel.polygon,panel.polygon[0]].map(p=>screen(point(p.x,data.height(p)+.03,-p.y))).join(' '),fill:'none',stroke:'#c5e3e9','stroke-width':.8}));}
+  const trims=roofTrimLayout(state);const renderedFaces=faces.map(item=>({...item,shape:item.data.points.map(p=>projected(p.x,item.data.height(p),-p.y))})).sort((a,b)=>b.shape.reduce((n,p)=>n+p.depth,0)-a.shape.reduce((n,p)=>n+p.depth,0));
+  for(const {row,data,shape} of renderedFaces){svg.append(make('polygon',{points:shape.map(p=>screen([p.x,p.y])).join(' '),fill:state.settings.color,stroke:'#d5f2ff','stroke-width':2}));if(showPanels)for(const panel of row.panels)svg.append(make('polyline',{points:[...panel.polygon,panel.polygon[0]].map(p=>screen(point(p.x,data.height(p)+.03,-p.y))).join(' '),fill:'none',stroke:'#c5e3e9','stroke-width':.8}));for(const t of trims.segments.filter(t=>t.faceId===row.face.id)){const lift=t.kind==='Eave trim'?.012:0;svg.append(make('polygon',{'data-roof-trim':t.kind,points:[point(t.a.x,t.topA+lift,-t.a.y),point(t.b.x,t.topB+lift,-t.b.y),point(t.b.x,t.topB-t.depth+lift,-t.b.y),point(t.a.x,t.topA-t.depth+lift,-t.a.y)].map(screen).join(' '),fill:trims.settings.color,stroke:'#526b78','stroke-width':.7}))}}
   svg.addEventListener('click',event=>{if(moved)return;const id=event.target.closest('[data-wall-id]')?.getAttribute('data-wall-id'),row=wallLayout.rows.find(r=>r.id===id);if(!row)return;const p=svg.createSVGPoint();p.x=event.clientX;p.y=event.clientY;const local=p.matrixTransform(svg.getScreenCTM().inverse()),ax=point(row.a.x,0,-row.a.y)[0]*scale+tx,bx=point(row.b.x,0,-row.b.y)[0]*scale+tx,t=Math.abs(bx-ax)>1?Math.max(0,Math.min(1,(local.x-ax)/(bx-ax))):.5;document.dispatchEvent(new CustomEvent('wall-picked',{detail:{wallId:id,offset:t*row.widthFeet}}))});
   host.replaceChildren(svg);
  }

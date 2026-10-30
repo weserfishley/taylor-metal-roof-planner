@@ -1,6 +1,7 @@
 import {project,validPolygon} from './geometry.mjs';
 import {wallPanelDefaults} from './wall-panels.mjs';
 import {getWalls,validateOpening} from './walls.mjs';
+import {trimDefaults} from './roof-trim.mjs';
 
 export const PROJECT_VERSION=6;
 export const EDGE_TYPES=['Unlabeled','Ridge','Hip','Valley','Rake','Eave','Flashing'];
@@ -63,5 +64,6 @@ export function parseProject(input){
  const wallOpenings=[],allWalls=getWalls({building,walls,origin});
  for(const wall of allWalls.filter(w=>walls.some(x=>x.id===w.id)))if(wall.widthFeet<.99||wall.widthFeet>500.01)throw Error('Invalid standalone wall length');
  for(const o of raw.wallOpenings||[]){const wall=allWalls.find(w=>w.id===o.wallId);if(!wall)throw Error('Opening references a missing wall');const opening={id:cleanText(o.id,100)||'opening-'+wallOpenings.length,wallId:wall.id,kind:o.kind==='Window'?'Window':'Door',offset:finite(o.offset,0,10000,'opening offset'),width:finite(o.width,.01,500,'opening width'),height:finite(o.height,.01,200,'opening height'),sill:finite(o.sill,0,200,'opening sill')};validateOpening(wall,opening,wallOpenings);wallOpenings.push(opening)}
- return {walls,wallOpenings,wallPanels,version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,building,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
+ const sourceTrim=raw.trim||trimDefaults,trim={eave:Boolean(sourceTrim.eave),fascia:Boolean(sourceTrim.fascia),fasciaDepth:finite(sourceTrim.fasciaDepth??6,1,24,'fascia face height'),eaveDepth:finite(sourceTrim.eaveDepth??2,.5,12,'eave trim face height'),stockLength:finite(sourceTrim.stockLength??10,1,40,'trim stock length'),color:/^#[a-f\d]{6}$/i.test(sourceTrim.color||'')?sourceTrim.color:trimDefaults.color};
+ return {trim,walls,wallOpenings,wallPanels,version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,building,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
 }

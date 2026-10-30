@@ -1,5 +1,17 @@
 # Release record
 
+## Eave/rake overhangs and trim parts — October 30, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Selected exterior eave/rake incremental horizontal overhangs; connected collinear rake extension; eave and fascia parts with face heights, color, stock length, linear footage, piece counts and both 3D render paths. |
+| Risk class | R3 — roof geometry, elevations, panels, dependent estimates and saved trim settings. |
+| Geometry | Offset exterior edge lines and intersect adjacent edge lines; propagate shared endpoint changes, preserve original plane equations by recalculating the low-edge elevation reference, validate polygons and reject newly conflicting seams/corners. Pitches and wall footprints stay fixed. Additions are incremental, not absolute overhang settings. |
+| Takeoff | Eave trim uses labeled eaves; fascia uses labeled eaves/rakes. Surface lengths use current pitch-derived heights; geographic duplicate edges counted once. Stock pieces round up per edge with no lap allowance or offcut reuse. |
+| Verification | PASS: all existing geometry/data suites plus overhang/trim fixture for 12-inch eave and joined-rake offsets, surface-height preservation, shared ridge, changed area, trim lengths/pieces, input rejection and saved-state round trip. Local browser applied 12-inch eave extension to a 40 × 30 ft house: plan area changed from 1,200 to 1,240 sq ft; enabled trim showed 80 ft eave trim, 149.32 ft fascia and 8 rendered trim faces. Browser file round trip, mobile and WebGL visual checks NOT VERIFIED. |
+| Limits | Four-foot maximum per addition, bounded acute corners, no manufacturer profile or fastener modeling. Simple trim faces, no dedicated trim pricing/PDF/CSV integration yet. Local testing build; public site unchanged. |
+| Rollback | Commit a711016 / tag click-wall-tools-v2.1-2026-10-30. |
+
 ## Click-based wall and opening tools — October 30, 2026
 
 | Field | Record |
