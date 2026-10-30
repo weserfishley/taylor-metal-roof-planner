@@ -1,4 +1,5 @@
 import {project,validPolygon} from './geometry.mjs';
+import {wallPanelDefaults} from './wall-panels.mjs';
 
 export const PROJECT_VERSION=5;
 export const EDGE_TYPES=['Unlabeled','Ridge','Hip','Valley','Rake','Eave','Flashing'];
@@ -53,5 +54,6 @@ export function parseProject(input){
  let building=null;
  if(raw.building?.parts){if(!Array.isArray(raw.building.parts)||raw.building.parts.length>50)throw Error('Too many building sections');building={kind:'multi-gable',parts:raw.building.parts.map((part,index)=>({id:cleanText(part.id,100)||`section-${index}`,name:cleanText(part.name,80)||'Building section',wallHeight:finite(part.wallHeight,0,200,'wall height'),footprint:validatePoints(part.footprint,'Section footprint')}))}}
  else if(raw.building?.footprint)building={kind:'gable',wallHeight:finite(raw.building.wallHeight,0,200,'wall height'),footprint:validatePoints(raw.building.footprint,'House footprint')};
- return {version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,building,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
+ const sourceWall=raw.wallPanels||wallPanelDefaults,wallPanels={show:Boolean(sourceWall.show),width:finite(sourceWall.width??36,1,120,'wall panel coverage'),maxLength:finite(sourceWall.maxLength??20,1,200,'wall panel maximum length'),allowance:finite(sourceWall.allowance??0,0,48,'wall panel allowance'),color:/^#[a-f\d]{6}$/i.test(sourceWall.color||'')?sourceWall.color:wallPanelDefaults.color};
+ return {wallPanels,version:PROJECT_VERSION,address:cleanText(raw.address,300),origin,outlines,faces,building,settings:cleanSettings,materials,customer,quote,panelOverrides:Array.isArray(raw.panelOverrides)?structuredClone(raw.panelOverrides.slice(0,500)):[],ui};
 }

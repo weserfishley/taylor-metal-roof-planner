@@ -1,5 +1,16 @@
 # Release record
 
+## Vertical wall panel layouts — October 30, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Dedicated wall coverage, length limit, end allowance, color, visibility, gross area, blank area, per-wall quantities and cut list for generated building parts; wall seams in both renderers; optional saved wallPanels settings. |
+| Risk class | R3 — new material calculations and optional project data. |
+| Calculation | Each rectangular wall independently uses ceiling(width / coverage) panels; cut length is wall height plus allowance rounded upward to the next inch. Final coverage strip is clipped visually while full-width blanks count toward order area. Overlength panels remain flagged. |
+| Verification | PASS: existing geometry, project and building-section suites; wall fixture verifies 40 × 30 ft, 10 ft high walls produce 48 panels at 36 inches, 1,400 sq ft gross area, allowances, inch rounding, maximum-length flags, width changes and settings round trip. Local browser confirms 48 wall-panel polylines and visible wall seams in compatibility 3D. WebGL visual test, responsive test, and browser file round trip for the new wall settings NOT VERIFIED. Local test build only. |
+| Limits | Vertical rectangular walls only. Gable triangles excluded; windows, doors and shared interior walls not deducted. Wall quantities/prices are not integrated with quote/PDF or roof CSV exports. Wall footprints remain independent of manual roof edits. |
+| Rollback | Commit d85b121 / tag building-sections-v1.8-2026-10-30. |
+
 ## Multiple named building sections — October 30, 2026
 
 | Field | Record |

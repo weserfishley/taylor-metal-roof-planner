@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {gableHouseTemplate,unproject} from './dist/geometry.mjs';
+import {wallPanelLayout} from './dist/wall-panels.mjs';
+import {createProjectState,snapshotProject,parseProject} from './dist/project.mjs';
+const state=createProjectState(),house=gableHouseTemplate({widthFeet:40,depthFeet:30,pitch:6,eaveHeight:10});
+state.building={parts:[{id:'main',name:'Main house',wallHeight:10,footprint:house.footprint.map(p=>unproject(p,state.origin))}]};
+state.wallPanels={show:true,width:36,maxLength:10,allowance:2,color:'#aabbcc'};
+let layout=wallPanelLayout(state);assert.equal(layout.count,48);assert.ok(Math.abs(layout.area-1400)<1e-5);assert.equal(layout.oversize,48);assert.ok(layout.rows.every(row=>row.length===122/12));
+const restored=parseProject(JSON.stringify(snapshotProject(state)));assert.deepEqual(restored.wallPanels,state.wallPanels);assert.equal(wallPanelLayout(restored).count,48);
+state.wallPanels.width=12;state.wallPanels.allowance=0;layout=wallPanelLayout(state);assert.equal(layout.count,140);assert.equal(layout.oversize,0);
+assert.throws(()=>parseProject({...snapshotProject(state),wallPanels:{width:0}}),/wall panel coverage/);
+assert.equal(wallPanelLayout(createProjectState()).count,0);
+console.log('PASS: wall area, per-wall quantities, coverage changes, inch rounding, maximum flags, empty projects, and wall settings round trip');
