@@ -1,5 +1,14 @@
 # Release record
 
+## Correct gable ridge orientation — October 30, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Corrected the typed gable-house template's per-plane downslope bearings. Generated planes now rise from both exterior eaves to the common ridge, rather than forming a center valley. |
+| Risk class | R3 — generated pitch direction, roof elevation, panel runs, and 3D geometry. |
+| Verification | PASS locally: deterministic fixture asserts 10 ft eaves and a 17 ft 6 in shared ridge for a 40 × 30 ft, 6/12 gable; geometry and project suites pass; compatibility renderer visually inspected at two rotations with panel layout enabled. Existing already-generated local geometry must be regenerated to use the corrected bearings. |
+| Rollback | Tag `interactive-compatibility-3d-v1.7.2-2026-10-30` |
+
 ## WebGL-free 3D compatibility preview — October 30, 2026
 
 | Field | Record |
