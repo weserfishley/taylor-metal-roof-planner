@@ -21,6 +21,8 @@ Project-file version 5 restores the complete editable session: outlines, planes,
 
 The live takeoff displays combined ridge, hip, valley, rake, and eave lengths. The customer-report workflow uses those same live calculations for pricing and produces print-ready quote, material, panel-layout, and full-project report options. Reports may include five 3D perspectives with the calculated panel layout; use the browser print window to save the result as PDF.
 
+The primary 3D viewer uses WebGL. If a browser blocks WebGL, the planner automatically switches to an SVG compatibility 3D preview so the roof surfaces, walls, pitch-derived heights, and optional panel layout remain reviewable. The compatibility preview is not an orbitable, photorealistic renderer and does not provide captured 3D report perspectives.
+
 The application uses Esri aerial imagery and address autocomplete plus OpenStreetMap building footprints through the public Overpass API. It does not require a Google Maps API key. Footprint coverage and geometry vary. Automatic outlines are editable snap guides only: they are excluded from roof area, panels, cut lists, exports, and 3D calculations.
 
 ## Important limitation
