@@ -1,5 +1,16 @@
 # Release record
 
+## Click-based wall and opening tools — October 30, 2026
+
+| Field | Record |
+| --- | --- |
+| Scope | Two-point Plan wall drawing with cursor preview and 14-pixel wall-endpoint snap; clickable wall hit areas in Plan; click wall selection in WebGL and compatibility 3D; compact measured opening dialog; click-to-attach new walls at the nearer endpoint. |
+| Risk class | R3 — point placement writes existing wall/opening geometry; schema stays version 6. |
+| Interaction | Wall tools enter Locate/trace mode. Label and pitch steps retain roof-edge hit behavior. Escape/Cancel exits wall placement; switching to roof drawing, pan, auto-outline, project open, or typed builder cancels the wall tool. 3D click distinguishes a 6-pixel drag threshold. |
+| Verification | PASS locally: syntax and all five geometry/data suites; browser click on compatibility 3D wall placed a visible window; two Plan clicks created a wall with measured length; Plan click on that wall placed a door, visible in 3D. WebGL interaction and mobile/touch NOT VERIFIED. |
+| Limits | 3D starts additions from existing wall endpoints; free two-point drawing uses Plan. Opening confirmation remains measured and validated. Existing independent wall/roof constraints and full-height panel blank assumptions still apply. Local testing build; public deployment unchanged. |
+| Rollback | Commit ab92e97 / tag walls-openings-v2.0-2026-10-30. |
+
 ## Independent walls and measured openings — October 30, 2026
 
 | Field | Record |
